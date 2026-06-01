@@ -1,0 +1,10 @@
+{
+  "salesOrderId": "SO10001",
+  "customer": {
+    "customerId": "C100",
+    "name": "John Smith"
+  },
+  "orderDate": "2026-05-26",
+  "totalAmount": 2500.75,
+  "currency": "USD"
+}

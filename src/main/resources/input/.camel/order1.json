@@ -1,0 +1,10 @@
+{
+  "salesOrderId": "SO10008",
+  "customer": {
+    "customerId": "C107",
+    "name": "Ava Thomas"
+  },
+  "orderDate": "2026-06-02",
+  "totalAmount": 620.75,
+  "currency": "EUR"
+}
