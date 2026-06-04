@@ -1,0 +1,9 @@
+{
+  "orderId": "ORD1001",
+  "customerName": "John",
+  "customerEmail": "john@test.com",
+  "mobileNumber": "9876543210",
+  "amount": 5000,
+  "currency": "USD",
+  "orderType": "VIP"
+}

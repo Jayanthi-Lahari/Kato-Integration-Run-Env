@@ -1,6 +1,6 @@
 <camel xmlns="http://camel.apache.org/schema/spring">
     <route id="route-multiCast">
-        <from id="from-saleDetails" uri="file-watch:src/main/resources/input"/>
+        <from id="from-saleDetails" uri="file-watch:src/main/resources/uiput"/>
         <log id="log-sales" message="Received Order =  ${body}" logName="fetch sale"/>
         <unmarshal id="unmarshal-4092">
             <json/>

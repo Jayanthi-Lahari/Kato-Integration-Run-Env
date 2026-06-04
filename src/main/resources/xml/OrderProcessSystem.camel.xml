@@ -1,0 +1,79 @@
+<camel xmlns="http://camel.apache.org/schema/spring">
+
+    <!-- ================================================= -->
+    <!-- GLOBAL EXCEPTION -->
+    <!-- ================================================= -->
+
+    <onException>
+
+        <exception>java.lang.Exception</exception>
+
+        <handled>
+            <constant>true</constant>
+        </handled>
+
+        <maximumRedeliveries>3</maximumRedeliveries>
+
+        <redeliveryDelay>5000</redeliveryDelay>
+
+        <!-- Audit ONLY failures -->
+
+        <wireTap uri="direct:auditFailure"/>
+
+        <!-- DLQ -->
+
+        <to uri="activemq:queue:ORDER.DLQ"/>
+
+    </onException>
+
+    <!-- ================================================= -->
+    <!-- MAIN ROUTE -->
+    <!-- ================================================= -->
+
+    <route id="order-processing-route">
+
+        <from uri="activemq:queue:order"/>
+
+        <!-- Audit ONLY incoming -->
+
+        <wireTap uri="direct:auditInbound"/>
+
+        <process ref="orderProcessor"/>
+
+        <marshal>
+            <jacksonxml/>
+        </marshal>
+
+        <to uri="file:output/orders"/>
+
+    </route>
+
+    <!-- ================================================= -->
+    <!-- INBOUND AUDIT -->
+    <!-- ================================================= -->
+
+    <route id="audit-inbound">
+
+        <from uri="direct:auditInbound"/>
+
+        <process ref="auditProcessor"/>
+
+        <to uri="file:audit/inbound"/>
+
+    </route>
+
+    <!-- ================================================= -->
+    <!-- FAILURE AUDIT -->
+    <!-- ================================================= -->
+
+    <route id="audit-failure">
+
+        <from uri="direct:auditFailure"/>
+
+        <process ref="auditProcessor"/>
+
+        <to uri="file:audit/failure"/>
+
+    </route>
+
+</camel>
