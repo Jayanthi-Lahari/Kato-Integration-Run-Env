@@ -13,34 +13,62 @@ public class AuditProcessor implements Processor {
     public void process(Exchange exchange) throws Exception {
 
         Exception exception =
-                exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+                exchange.getProperty(
+                        Exchange.EXCEPTION_CAUGHT,
+                        Exception.class
+                );
 
         String routeId =
                 exchange.getFromRouteId();
 
-        String errorMessage =
-                exception.getMessage();
+        // =================================================
+        // HANDLE NULL EXCEPTION
+        // =================================================
+
+        String errorMessage;
+
+        if(exception != null) {
+
+            errorMessage = exception.getMessage();
+
+        } else {
+
+            errorMessage = "NO ERROR";
+        }
 
         String body =
                 exchange.getIn().getBody(String.class);
 
         System.out.println("========== AUDIT LOG ==========");
 
-        System.out.println("Timestamp : " + LocalDateTime.now());
+        System.out.println("Timestamp : "
+                + LocalDateTime.now());
 
-        System.out.println("Route ID  : " + routeId);
+        System.out.println("Route ID  : "
+                + routeId);
 
-        System.out.println("Error     : " + errorMessage);
+        System.out.println("Error     : "
+                + errorMessage);
 
-        System.out.println("Payload   : " + body);
+        System.out.println("Payload   : "
+                + body);
 
         System.out.println("================================");
 
-        // Add Audit Headers
+        // =================================================
+        // AUDIT HEADERS
+        // =================================================
 
-        exchange.getMessage().setHeader("AuditStatus", "FAILED");
+        exchange.getMessage()
+                .setHeader(
+                        "AuditStatus",
+                        exception != null ? "FAILED" : "SUCCESS"
+                );
 
-        exchange.getMessage().setHeader("AuditTimestamp",
-                LocalDateTime.now().toString());
+        exchange.getMessage()
+                .setHeader(
+                        "AuditTimestamp",
+                        LocalDateTime.now().toString()
+                );
     }
 }

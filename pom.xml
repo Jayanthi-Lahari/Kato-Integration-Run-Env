@@ -68,11 +68,22 @@
 			<version>4.16.0</version>
 		</dependency>
 		<dependency>
+    <groupId>org.apache.camel</groupId>
+    <artifactId>camel-jsonpath</artifactId>
+    <version>4.16.0</version>
+</dependency>
+		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-activemq</artifactId>
 			<version>4.16.0</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+    <groupId>org.apache.camel.springboot</groupId>
+    <artifactId>camel-jacksonxml-starter</artifactId>
+    	<version>4.16.0</version>
+</dependency>
+
 		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-activemq-starter</artifactId>

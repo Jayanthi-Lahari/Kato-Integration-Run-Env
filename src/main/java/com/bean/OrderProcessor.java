@@ -1,28 +1,65 @@
 package com.bean;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.TreeMap;
+import java.util.Map;
 
+@Component("orderProcessor")
 public class OrderProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
 
-        TreeMap<String, Object> order =
-                (TreeMap<String, Object>) exchange.getIn().getBody(Object.class);
+        // =================================================
+        // READ BODY AS STRING
+        // =================================================
 
-        // Add Default Values
+        String jsonBody =
+                exchange.getIn().getBody(String.class);
+
+        // =================================================
+        // JSON STRING → MAP
+        // =================================================
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        Map<String, Object> order =
+                objectMapper.readValue(
+                        jsonBody,
+                        new TypeReference<Map<String, Object>>() {}
+                );
+
+        // =================================================
+        // FORCE EXCEPTION FOR TESTING
+        // =================================================
+
+        if(order.get("customerName")
+                .toString()
+                .equalsIgnoreCase("Lahari")) {
+
+            throw new Exception(
+                    "Invalid Customer : Lahari Not Allowed"
+            );
+        }
+
+        // =================================================
+        // BUSINESS ENRICHMENT
+        // =================================================
 
         order.put("OrderStatus", "NEW");
 
-        // VIP Logic
+        String orderType =
+                (String) order.get("orderType");
 
-        String orderType = (String) order.get("orderType");
-
-        if(orderType != null && orderType.equalsIgnoreCase("VIP")) {
+        if(orderType != null &&
+                orderType.equalsIgnoreCase("VIP")) {
 
             order.put("Priority", "HIGH");
 
@@ -31,16 +68,27 @@ public class OrderProcessor implements Processor {
             order.put("Priority", "NORMAL");
         }
 
-        // Enrichment
-
         order.put("CreatedBy", "CamelSystem");
 
-        order.put("CreatedDate", LocalDate.now().toString());
+        order.put("CreatedDate",
+                LocalDate.now().toString());
 
-        order.put("SourceSystem", "ECOMMERCE");
+        order.put("SourceSystem",
+                "ECOMMERCE");
 
-        // Set Modified Body Back
+        // =================================================
+        // MAP → XML
+        // =================================================
 
-        exchange.getMessage().setBody(order);
+        XmlMapper xmlMapper = new XmlMapper();
+
+        String xml =
+                xmlMapper.writeValueAsString(order);
+
+        // =================================================
+        // SET XML BODY
+        // =================================================
+
+        exchange.getMessage().setBody(xml);
     }
 }

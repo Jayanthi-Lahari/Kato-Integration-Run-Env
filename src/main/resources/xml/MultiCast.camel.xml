@@ -1,6 +1,6 @@
-<camel xmlns="http://camel.apache.org/schema/spring">
+<!-- <camel xmlns="http://camel.apache.org/schema/spring">
     <route id="route-multiCast">
-        <from id="from-saleDetails" uri="file-watch:src/main/resources/uiput"/>
+        <from id="from-saleDetails" uri="file-watch:src/main/resources/input"/>
         <log id="log-sales" message="Received Order =  ${body}" logName="fetch sale"/>
         <unmarshal id="unmarshal-4092">
             <json/>
@@ -21,4 +21,4 @@ ${body}
         </setBody>
         <to id="to-9235" uri="file:src/main/resources/output?fileName=report-${date:now:yyyyMMdd}.txt"/>
     </route>
-</camel>
+</camel> -->

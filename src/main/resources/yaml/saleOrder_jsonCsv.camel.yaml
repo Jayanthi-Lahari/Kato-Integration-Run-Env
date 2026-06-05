@@ -1,46 +1,46 @@
-- route:
-    id: route-json-csv
-    from:
-      id: from-2074
-      uri: file
-      parameters:
-        directoryName: src/main/resources/input
-
-      steps:
-        - log:
-           message: "INPUT JSON = ${body}"
-        - to:
-            id: saleOrder-JsonCSV-xslt-1619
-            uri: xslt-saxon:xslt/saleOrder_JsonCSV.xsl
-            parameters:
-              failOnNullBody: false
-              useJsonBody: true
-
-        - log:
-            id: log-after-xslt
-            message: "BODY AFTER XSLT = ${body}"
-
-        - unmarshal:
-            id: unmarshal-json
-            json: {}
-
-        - log:
-            id: log-after-unmarshal
-            message: "BODY AFTER UNMARSHAL = ${body}"
-
-        - setBody:
-            id: setBody-8743
-            simple:
-              expression: "${body[orderNumber]}|${body[customerNumber]}|${body[customerName]}|${body[formattedDate]}|${body[amount]}|${body[currencyCode]}"
-
-        - log:
-            id: log-final
-            message: "FINAL CSV RECORD = ${body}"
-
-        - to:
-            id: file-output
-            uri: file
-            parameters:
-              directoryName: src/main/resources/output/orders
-              fileName: "${date:now:yyyyMMdd}.csv"
-              fileExist: Override
+#- route:
+#    id: route-json-csv
+#    from:
+#      id: from-2074
+#      uri: file
+#      parameters:
+#        directoryName: src/main/resources/input
+#
+#      steps:
+#        - log:
+#           message: "INPUT JSON = ${body}"
+#        - to:
+#            id: saleOrder-JsonCSV-xslt-1619
+#            uri: xslt-saxon:xslt/saleOrder_JsonCSV.xsl
+#            parameters:
+#              failOnNullBody: false
+#              useJsonBody: true
+#
+#        - log:
+#            id: log-after-xslt
+#            message: "BODY AFTER XSLT = ${body}"
+#
+#        - unmarshal:
+#            id: unmarshal-json
+#            json: {}
+#
+#        - log:
+#            id: log-after-unmarshal
+#            message: "BODY AFTER UNMARSHAL = ${body}"
+#
+#        - setBody:
+#            id: setBody-8743
+#            simple:
+#              expression: "${body[orderNumber]}|${body[customerNumber]}|${body[customerName]}|${body[formattedDate]}|${body[amount]}|${body[currencyCode]}"
+#
+#        - log:
+#            id: log-final
+#            message: "FINAL CSV RECORD = ${body}"
+#
+#        - to:
+#            id: file-output
+#            uri: file
+#            parameters:
+#              directoryName: src/main/resources/output/orders
+#              fileName: "${date:now:yyyyMMdd}.csv"
+#              fileExist: Override

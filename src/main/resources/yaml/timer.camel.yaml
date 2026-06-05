@@ -1,14 +1,14 @@
-- route:
-    id: route-2172
-    from:
-      id: from-3706
-      uri: timer
-      parameters:
-        timerName: template
-        period: 10000
-      steps:
-        - setBody:
-            constant: "Hello kaoto may 26"
-        - log:
-            id: log-2812
-            message: "${body}"
+#- route:
+#    id: route-2172
+#    from:
+#      id: from-3706
+#      uri: timer
+#      parameters:
+#        timerName: template
+#        period: 10000
+#      steps:
+#        - setBody:
+#            constant: "Hello kaoto may 26"
+#        - log:
+#            id: log-2812
+#            message: "${body}"
