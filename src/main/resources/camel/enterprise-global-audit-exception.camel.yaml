@@ -1,0 +1,32 @@
+- onException:
+    id: global-exception-handler
+
+    exception:
+      - java.lang.Exception
+
+    handled:
+      constant: true
+
+    steps:
+
+      - setBody:
+          simple: |
+            {
+              "routeId":"${routeId}",
+              "exchangeId":"${exchangeId}",
+              "status":"FAILED",
+              "errorMessage":"${exception.message}",
+              "failedAt":"${date:now:yyyy-MM-dd HH:mm:ss}",
+              "sourceFile":"${header.CamelFileName}"
+            }
+
+      - convertBodyTo:
+          type: org.bson.Document
+
+      - to:
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            database: kaoto
+            collection: error_audit_logs
+            operation: insert

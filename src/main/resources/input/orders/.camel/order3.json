@@ -1,0 +1,14 @@
+[
+  {
+    "reportId": "R1001",
+    "customerName": "vamsi",
+    "region": "US",
+    "salesAmount": 1200
+  },
+  {
+    "reportId": "R1002",
+    "customerName": "papu",
+    "region": "EU",
+    "salesAmount": 2200
+  }
+]

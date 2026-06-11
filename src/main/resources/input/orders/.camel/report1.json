@@ -1,0 +1,32 @@
+[
+  {
+    "reportId": "R1001",
+    "customerName": "John Smith",
+    "region": "US",
+    "salesAmount": 1200
+  },
+  {
+    "reportId": "R1002",
+    "customerName": "David Miller",
+    "region": "UK",
+    "salesAmount": 980
+  },
+  {
+    "reportId": "R1003",
+    "customerName": "Priya Sharma",
+    "region": "India",
+    "salesAmount": 2100
+  },
+  {
+    "reportId": "R1004",
+    "customerName": "Emily Johnson",
+    "region": "Canada",
+    "salesAmount": 1750
+  },
+  {
+    "reportId": "R1005",
+    "customerName": "Michael Brown",
+    "region": "Australia",
+    "salesAmount": 1430
+  }
+]

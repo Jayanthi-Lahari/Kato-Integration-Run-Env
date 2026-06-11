@@ -1,0 +1,19 @@
+- route:
+    id: route-1564
+    from:
+      id: from-1124
+      uri: direct
+      parameters:
+        name: audit-success
+      steps:
+        - convertBodyTo:
+            id: convertBodyTo-2151
+            type: org.bson.Document
+        - to:
+            id: to-1554
+            uri: mongodb
+            parameters:
+              connectionBean: mongoBean
+              database: kaoto
+              collection: common_audit_logs
+              operation: insert
