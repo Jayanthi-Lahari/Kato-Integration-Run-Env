@@ -1,0 +1,80 @@
+- onException:
+    id: file-processing-exception
+    exception:
+      - java.lang.Exception
+    handled:
+      constant: true
+    steps:
+      - setBody:
+          simple:
+            expression: "[FAILED] Route=${routeId}, Error=${exception.message}, Time=${date:now:yyyy-MM-dd HH:mm:ss}"
+
+      - to:
+          uri: file
+          parameters:
+            directoryName: audit/failure
+            fileName: failure-audit.log
+            fileExist: Append
+
+      - bean:
+          ref: mailNotificationBean
+          method: "sendFailureNotification('{{alert.to.email}}','${routeId}','${exception.message}')"
+
+
+- route:
+    id: order-file-monitor-route
+
+    from:
+      uri: timer
+      parameters:
+        timerName: orderScheduler
+        period: 300000
+
+      steps:
+
+        - pollEnrich:
+            simple:
+              expression: "file:src/main/resources/input/orders?include=order.*\\.json&noop=false"
+            timeout: "1000"
+
+        - choice:
+            when:
+
+              - simple:
+                  expression: "${body} != null"
+
+                steps:
+
+                  - setBody:
+                      simple:
+                        expression: "[SUCCESS] File=${header.CamelFileName}, Route=${routeId}, Time=${date:now:yyyy-MM-dd HH:mm:ss}"
+
+                  - to:
+                      uri: file
+                      parameters:
+                        directoryName: audit/success
+                        fileName: success-audit.log
+                        fileExist: Append
+
+                  - to:
+                      uri: activemq
+                      parameters:
+                        destinationName: order_Stored
+
+            otherwise:
+              steps:
+
+                - setBody:
+                    simple:
+                      expression: "[WARNING] No file found in orders folder, Route=${routeId}, Time=${date:now:yyyy-MM-dd HH:mm:ss}"
+
+                - to:
+                    uri: file
+                    parameters:
+                      directoryName: audit/warning
+                      fileName: warning-audit.log
+                      fileExist: Append
+
+                - throwException:
+                    exceptionType: java.lang.RuntimeException
+                    message: "No File Found in Orders Folder"

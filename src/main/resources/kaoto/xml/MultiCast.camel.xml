@@ -1,0 +1,24 @@
+<!-- <camel xmlns="http://camel.apache.org/schema/spring">
+    <route id="route-multiCast">
+        <from id="from-saleDetails" uri="file-watch:src/main/resources/input"/>
+        <log id="log-sales" message="Received Order =  ${body}" logName="fetch sale"/>
+        <unmarshal id="unmarshal-4092">
+            <json/>
+        </unmarshal>
+        <multicast id="multicast-1696">
+            <toD id="to-mongoDB" uri="mongodb:mongoBean?database=contactsDB&amp;collection=orders&amp;operation=insert"/>
+            <toD id="to-saleToMq" uri="activemq:topic:salesDetails?disableReplyTo=true&amp;jmsMessageType=Text&amp;connectionFactory=#connectionFactory&amp;durableSubscriptionName=MongoSubscriber"/>
+        </multicast>
+    </route>
+    <route id="route-TopicSub">
+        <from id="sales-order-subscriber" uri="activemq:topic:salesDetails?connectionFactory=#connectionFactory"/>
+        <log id="log-2250-1888" message="Received from Topic = ${body}"/>
+        <setBody id="setBody-2822">
+            <simple>
+                Order Notification:
+${body}
+            </simple>
+        </setBody>
+        <to id="to-9235" uri="file:src/main/resources/output?fileName=report-${date:now:yyyyMMdd}.txt"/>
+    </route>
+</camel> -->

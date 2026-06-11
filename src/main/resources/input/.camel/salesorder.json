@@ -1,0 +1,10 @@
+{
+  "salesOrderId": "SO100078",
+  "customer": {
+    "customerId": "C1090",
+    "name": "lahari"
+  },
+  "orderDate": "2026-05-26",
+  "totalAmount": 2500.75,
+  "currency": "USD"
+}

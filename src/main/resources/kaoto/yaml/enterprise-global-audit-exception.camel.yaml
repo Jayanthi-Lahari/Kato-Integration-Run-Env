@@ -1,0 +1,147 @@
+# =========================================================
+# GLOBAL EXCEPTION HANDLER
+# Stores all route exceptions into MongoDB audit collection
+# =========================================================
+
+- onException:
+    id: global-exception-handler
+
+    exception:
+      - java.lang.Exception
+
+    handled:
+      constant: true
+
+    steps:
+
+      - setBody:
+          simple:
+            expression: >
+              {
+                "routeId":"${routeId}",
+                "exchangeId":"${exchangeId}",
+                "status":"FAILED",
+                "errorMessage":"${exception.message}",
+                "failedAt":"${date:now:yyyy-MM-dd HH:mm:ss}",
+                "sourceFile":"${header.CamelFileName}"
+              }
+
+      - marshal:
+          json: {}
+
+      - to:
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            database: enterprise_audit_db
+            collection: error_audit_logs
+            operation: insert
+
+# =========================================================
+# MAIN FILE PROCESSING ROUTE
+# Reads files periodically and stores audits in MongoDB
+# =========================================================
+
+- route:
+    id: enterprise-file-processing-route
+
+    from:
+      uri: timer
+      parameters:
+        timerName: enterpriseScheduler
+        period: 300000
+
+      steps:
+
+        # -------------------------------------------------
+        # READ FILES
+        # -------------------------------------------------
+
+        - pollEnrich:
+            simple:
+              expression: "file:src/main/resources/input/orders?include=.*\\.json&noop=false"
+            timeout: "2000"
+
+        # -------------------------------------------------
+        # CHECK FILE EXISTENCE
+        # -------------------------------------------------
+
+        - choice:
+
+            when:
+
+              - simple:
+                  expression: "${body} != null"
+
+                steps:
+
+                  # ---------------------------------------
+                  # STORE SUCCESS AUDIT
+                  # ---------------------------------------
+
+                  - setBody:
+                      simple:
+                        expression: >
+                          {
+                            "routeId":"${routeId}",
+                            "exchangeId":"${exchangeId}",
+                            "status":"SUCCESS",
+                            "fileName":"${header.CamelFileName}",
+                            "processedAt":"${date:now:yyyy-MM-dd HH:mm:ss}"
+                          }
+
+                  - marshal:
+                      json: {}
+
+                  - to:
+                      uri: mongodb
+                      parameters:
+                        connectionBean: mongoBean
+                        database: enterprise_audit_db
+                        collection: processing_audit_logs
+                        operation: insert
+
+                  # ---------------------------------------
+                  # SEND TO ACTIVEMQ
+                  # ---------------------------------------
+
+                  - to:
+                      uri: activemq
+                      parameters:
+                        destinationName: processed_orders_queue
+
+            otherwise:
+
+              steps:
+
+                # -----------------------------------------
+                # THROW BUSINESS EXCEPTION
+                # -----------------------------------------
+
+                - throwException:
+                    exceptionType: java.lang.RuntimeException
+                    message: "No files found for processing"
+
+# =========================================================
+# REUSABLE AUDIT ROUTE
+# Can be called from any route using direct:auditRoute
+# =========================================================
+
+- route:
+    id: reusable-audit-route
+
+    from:
+      uri: direct:auditRoute
+
+      steps:
+
+        - marshal:
+            json: {}
+
+        - to:
+            uri: mongodb
+            parameters:
+              connectionBean: mongoBean
+              database: enterprise_audit_db
+              collection: common_audit_logs
+              operation: insert

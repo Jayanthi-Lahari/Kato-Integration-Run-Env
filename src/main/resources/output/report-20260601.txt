@@ -1,0 +1,2 @@
+Order Notification:
+{salesOrderId=SO10002, customer={customerId=C102, name=Emma Johnson}, orderDate=2026-05-27, totalAmount=1800.5, currency=USD}
