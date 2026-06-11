@@ -1,0 +1,118 @@
+{
+  "timestamp": "2026-06-08 10:31:22",
+  "routeId": "warehouse-to-inventory",
+  "exchangeId": "E7C5B76DDC07032-0000000000000000",
+  "payload": {
+  "warehouseId": "WH1001",
+  "warehouseName": "Hyderabad Central Warehouse",
+  "location": "Hyderabad",
+  "inventoryDate": "2026-06-03",
+  "manager": "Ramesh Kumar",
+  "products": [
+    {
+      "productId": "P100",
+      "productName": "Laptop",
+      "category": "Electronics",
+      "quantity": 50,
+      "unitPrice": 65000
+    },
+    {
+      "productId": "P101",
+      "productName": "Mouse",
+      "category": "Accessories",
+      "quantity": 200,
+      "unitPrice": 500
+    },
+    {
+      "productId": "P102",
+      "productName": "Keyboard",
+      "category": "Accessories",
+      "quantity": 120,
+      "unitPrice": 1200
+    }
+  ]
+}
+}{
+  "timestamp": "2026-06-08 10:31:23",
+  "routeId": "warehouse-to-inventory",
+  "exchangeId": "E7C5B76DDC07032-0000000000000000",
+  "payload": {
+  "timestamp": "2026-06-08 10:31:22",
+  "routeId": "warehouse-to-inventory",
+  "exchangeId": "E7C5B76DDC07032-0000000000000000",
+  "payload": {
+  "warehouseId": "WH1001",
+  "warehouseName": "Hyderabad Central Warehouse",
+  "location": "Hyderabad",
+  "inventoryDate": "2026-06-03",
+  "manager": "Ramesh Kumar",
+  "products": [
+    {
+      "productId": "P100",
+      "productName": "Laptop",
+      "category": "Electronics",
+      "quantity": 50,
+      "unitPrice": 65000
+    },
+    {
+      "productId": "P101",
+      "productName": "Mouse",
+      "category": "Accessories",
+      "quantity": 200,
+      "unitPrice": 500
+    },
+    {
+      "productId": "P102",
+      "productName": "Keyboard",
+      "category": "Accessories",
+      "quantity": 120,
+      "unitPrice": 1200
+    }
+  ]
+}
+}
+}{
+  "timestamp": "2026-06-08 10:31:23",
+  "routeId": "warehouse-to-inventory",
+  "exchangeId": "E7C5B76DDC07032-0000000000000000",
+  "payload": {
+  "timestamp": "2026-06-08 10:31:23",
+  "routeId": "warehouse-to-inventory",
+  "exchangeId": "E7C5B76DDC07032-0000000000000000",
+  "payload": {
+  "timestamp": "2026-06-08 10:31:22",
+  "routeId": "warehouse-to-inventory",
+  "exchangeId": "E7C5B76DDC07032-0000000000000000",
+  "payload": {
+  "warehouseId": "WH1001",
+  "warehouseName": "Hyderabad Central Warehouse",
+  "location": "Hyderabad",
+  "inventoryDate": "2026-06-03",
+  "manager": "Ramesh Kumar",
+  "products": [
+    {
+      "productId": "P100",
+      "productName": "Laptop",
+      "category": "Electronics",
+      "quantity": 50,
+      "unitPrice": 65000
+    },
+    {
+      "productId": "P101",
+      "productName": "Mouse",
+      "category": "Accessories",
+      "quantity": 200,
+      "unitPrice": 500
+    },
+    {
+      "productId": "P102",
+      "productName": "Keyboard",
+      "category": "Accessories",
+      "quantity": 120,
+      "unitPrice": 1200
+    }
+  ]
+}
+}
+}
+}

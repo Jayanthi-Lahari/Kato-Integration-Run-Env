@@ -52,6 +52,10 @@
 			<version>4.16.0</version>
 		</dependency>
 		<dependency>
+    <groupId>org.apache.httpcomponents.client5</groupId>
+    <artifactId>httpclient5</artifactId>
+</dependency>
+		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-mail-starter</artifactId>
 			<version>4.16.0</version>
@@ -67,6 +71,12 @@
 			<artifactId>camel-spring-boot-starter</artifactId>
 			<version>4.16.0</version>
 		</dependency>
+		<dependency>
+    <groupId>org.apache.camel</groupId>
+    <artifactId>camel-http</artifactId>
+    <version>4.16.0</version>
+    <scope>compile</scope>
+</dependency>
 		<dependency>
     <groupId>org.apache.camel</groupId>
     <artifactId>camel-jsonpath</artifactId>

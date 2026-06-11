@@ -1,0 +1,28 @@
+- route:
+    id: slack-notification-route
+    from:
+      uri: timer
+      parameters:
+        timerName: slackTest
+        period: 60000   # every 1 min
+      steps:
+
+        - setBody:
+            simple: |
+              {
+                "text": "🚨 Camel Alert\n\nRoute: ${routeId}\nTime: ${date:now:yyyy-MM-dd HH:mm:ss}\nMessage: Test Slack notification from Camel"
+              }
+
+        - setHeader:
+            name: Content-Type
+            constant: application/json
+
+        - setHeader:
+            name: CamelHttpMethod
+            constant: POST
+
+        - to:
+            uri: "{{slack.webhook.url}}"
+
+        - log:
+            message: "Slack notification sent successfully"

@@ -1,4 +1,4 @@
-<!-- <camel xmlns="http://camel.apache.org/schema/spring">
+<camel xmlns="http://camel.apache.org/schema/spring">
     <route id="route-sale-data">
         <from id="from-2074" uri="file:src/main/resources/input"/>
         <log message="INPUT JSON = ${body}"/>
@@ -18,4 +18,4 @@
         <log id="log-final" message="FINAL CSV RECORD = ${body}"/>
         <poll id="to-order" uri="file:src/main/resources/output?fileName=orders-${date:now:yyyyMMdd}.csv&amp;fileExist=Override"/>
     </route>
-</camel> -->
+</camel>
