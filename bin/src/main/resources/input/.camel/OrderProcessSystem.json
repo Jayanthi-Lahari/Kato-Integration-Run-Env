@@ -1,0 +1,9 @@
+{
+  "orderId": "ORD1007",
+  "customerName": "reshi",
+  "customerEmail": "reshi@test.com",
+  "mobileNumber": "9876543210",
+  "amount": 5000,
+  "currency": "USD",
+  "orderType": "VIP"
+}

@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "camel.springboot.main-run-controller",
+  "type": "java.lang.String",
+  "description": "A description for 'camel.springboot.main-run-controller'"
+}]}

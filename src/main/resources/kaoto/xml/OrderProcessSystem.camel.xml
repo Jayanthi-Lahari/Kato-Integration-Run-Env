@@ -1,0 +1,119 @@
+<camel xmlns="http://camel.apache.org/schema/spring">
+
+	<!-- ================================================= -->
+	<!-- PRODUCER ROUTE -->
+	<!-- ================================================= -->
+
+	<route id="producer-route">
+
+		<from uri="file:src/main/resources/input?include=order.*\.json" />
+
+		<!-- Extract orderType From JSON -->
+
+		<setHeader name="orderType">
+
+			<jsonpath>$.orderType</jsonpath>
+
+		</setHeader>
+
+		<!-- Send To ActiveMQ -->
+
+		<to uri="activemq:queue:order" />
+
+	</route>
+
+	<!-- ================================================= -->
+	<!-- CONSUMER ROUTE -->
+	<!-- ================================================= -->
+
+	<route id="consumer-route">
+
+		<from
+			uri="activemq:queue:order?selector=orderType='VIP'&amp;jmsMessageType=Text&amp;disableReplyTo=true" />
+
+		<!-- ================================================= -->
+		<!-- EXCEPTION HANDLER -->
+		<!-- ================================================= -->
+
+		<onException>
+
+			<exception>java.lang.Exception</exception>
+
+		<!-- 	<redeliveryPolicy maximumRedeliveries="3"
+				redeliveryDelay="5000" useExponentialBackOff="true" /> -->
+
+			<handled>
+				<constant>true</constant>
+			</handled>
+
+			<setBody>
+
+				<simple>
+					{
+					"Status":"FAILED",
+					"RouteId":"${routeId}",
+					"ExceptionClass":"${exception.class}",
+					"ErrorMessage":"${exception.message}",
+					"FailedBody":"${body}",
+					"Timestamp":"${date:now:yyyy-MM-dd HH:mm:ss}"
+					}
+				</simple>
+
+			</setBody>
+
+			<!-- Failure Audit -->
+
+			<wireTap uri="direct:auditFailure" />
+
+			<!-- DLQ -->
+
+			<to uri="activemq:queue:ORDER.DLQ" />
+
+		</onException>
+
+		<!-- Success Audit -->
+
+		<wireTap uri="direct:auditInbound" />
+
+		<!-- Business Logic -->
+
+		<process ref="orderProcessor" />
+
+		<!-- Target -->
+
+		<to
+			uri="file:src/main/resources/output/orders?fileName=VIP-${date:now:yyyyMMdd-HHmmssSSS}.xml" />
+
+	</route>
+
+	<!-- ================================================= -->
+	<!-- SUCCESS AUDIT -->
+	<!-- ================================================= -->
+
+	<route id="audit-inbound">
+
+		<from uri="direct:auditInbound" />
+
+		<process ref="auditProcessor" />
+
+		<to
+			uri="file:src/main/resources/audit/success?fileName=Audit-${date:now:yyyyMMdd-HHmmssSSS}.json" />
+
+	</route>
+
+	<!-- ================================================= -->
+	<!-- FAILURE AUDIT -->
+	<!-- ================================================= -->
+
+	<route id="audit-failure">
+
+		<from uri="direct:auditFailure" />
+
+		<process ref="auditProcessor" />
+
+		<to
+			uri="file:src/main/resources/audit/failure?fileName=Audit-${date:now:yyyyMMdd-HHmmssSSS}.json" />
+
+	</route>
+
+</camel>

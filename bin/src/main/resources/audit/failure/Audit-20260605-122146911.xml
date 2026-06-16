@@ -1,0 +1,16 @@
+{
+					"Status":"FAILED",
+					"RouteId":"consumer-route",
+					"ExceptionClass":"class java.lang.ClassCastException",
+					"ErrorMessage":"class [B cannot be cast to class java.util.TreeMap ([B and java.util.TreeMap are in module java.base of loader 'bootstrap')",
+					"FailedBody":"{
+  "orderId": "ORD1003",
+  "customerName": "Lahari",
+  "customerEmail": "lahari@test.com",
+  "mobileNumber": "9876543210",
+  "amount": 5000,
+  "currency": "USD",
+  "orderType": "VIP"
+}",
+					"Timestamp":"2026-06-05 12:21:46"
+					}

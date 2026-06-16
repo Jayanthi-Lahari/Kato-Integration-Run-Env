@@ -1,0 +1,137 @@
+- onException:
+    id: Exception-route
+    steps:
+      - setHeaders:
+          id: Headers-exception
+          headers:
+            - name: failedTime
+              simple:
+                expression: ${date:now:yyyy-MM-dd HH:mm:ss}
+          description: Headers
+      - choice:
+          id: choice-3335
+          when:
+            - id: when-9703
+              simple:
+                expression: ${exception.message} contains 'Cannot store file'
+              steps:
+                - setHeader:
+                    id: setHeader-1881
+                    name: errorMessage
+                    simple:
+                      expression: Target directory path does not exist and
+                        ${exception.message.replaceAll('\\','/')}
+          otherwise:
+            id: otherwise-1440
+            steps:
+              - setHeader:
+                  id: setHeader-3024
+                  name: errorMessage
+                  simple:
+                    expression: ${exception.message}
+      - to:
+          id: notification
+          uri: bean
+          parameters:
+            beanName: mailNotificationBean
+            method: failureNotification('{{alert.to.email}}')
+          description: mail
+      - setBody:
+          simple:
+            expression: |-
+              {
+                "routeId": "${routeId}",
+                "exchangeId": "${exchangeId}",
+                "startTime": "${header.startTime}",
+                "endTime": "${date:now:yyyy-MM-dd HH:mm:ss}",
+                "fileName": "${header.CamelFileName}",
+                "status": "FAILED",
+                "errorMessage": "${header.errorMessage}"
+              }
+      - convertBodyTo:
+          id: convertBodyTo-2702
+          type: org.bson.Document
+          description: Document Format
+      - to:
+          id: to-2262
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            collection: Exceptions
+            operation: insert
+            database: kaoto
+    handled:
+      constant: "true"
+    exception:
+      - java.lang.Exception
+      - java.io.FileNotFoundException
+- route:
+    id: file-to-file-notification
+    from:
+      id: start
+      uri: file
+      parameters:
+        directoryName: src/main/resources/input/orders
+        noop: false
+        moveFailed: error/${file:name}
+        includeExt: json
+        move: success/${file:name}
+      steps:
+        - setHeaders:
+            id: setHeaders-3455
+            headers:
+              - name: exchangeId
+                simple:
+                  expression: ${exchangeId}
+              - name: routeId
+                simple:
+                  expression: ${routeId}
+              - name: startTime
+                simple:
+                  expression: ${date:now:yyyy-MM-dd HH:mm:ss}
+        - to:
+            id: to-2676
+            uri: file
+            parameters:
+              directoryName: src/main/resources/output/test
+              autoCreate: false
+        - log:
+            id: targetHeaders
+            message: ${headers}
+        - wireTap:
+            id: wireTap-2265
+            uri: direct:audit-route
+            description: audit
+- route:
+    id: audit-route
+    from:
+      id: audit-start
+      uri: direct
+      parameters:
+        name: audit-route
+      steps:
+        - setBody:
+            simple:
+              expression: |-
+                {
+                  "routeId": "${routeId}",
+                  "exchangeId": "${exchangeId}",
+                  "startTime": "${header.startTime}",
+                  "endTime": "${date:now:yyyy-MM-dd HH:mm:ss}",
+                  "fileName": "${header.CamelFileName}",
+                  "Folder": "${header.CamelFileNameProduced.replaceAll('\\','/')}",
+                  "status": "SUCCESS"
+                }
+        - convertBodyTo:
+            id: convertBodyTo-1825
+            type: org.bson.Document
+            description: Document Format
+        - to:
+            id: audit-db
+            uri: mongodb
+            parameters:
+              database: kaoto
+              collection: Audit
+              operation: insert
+              connectionBean: mongoBean
+            description: Audit DB

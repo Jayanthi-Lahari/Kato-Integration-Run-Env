@@ -31,6 +31,8 @@
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
+
+		<!-- Spring Boot -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -41,27 +43,14 @@
 			<version>4.16.0</version>
 		</dependency>
 		<dependency>
-    <groupId>net.sf.saxon</groupId>
-    <artifactId>Saxon-HE</artifactId>
-    <version>12.5</version>
-</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-mail</artifactId>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongodb-driver-sync</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-file-watch-starter</artifactId>
 			<version>4.16.0</version>
 		</dependency>
-		<dependency>
-    <groupId>org.apache.httpcomponents.client5</groupId>
-    <artifactId>httpclient5</artifactId>
-</dependency>
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-actuator</artifactId>
-</dependency>
 		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-mail-starter</artifactId>
@@ -72,17 +61,12 @@
 			<artifactId>camel-jackson-starter</artifactId>
 			<version>4.16.0</version>
 		</dependency>
+		<!-- Camel Spring Boot -->
 		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-spring-boot-starter</artifactId>
 			<version>4.16.0</version>
 		</dependency>
-		<dependency>
-    <groupId>org.apache.camel</groupId>
-    <artifactId>camel-http</artifactId>
-    <version>4.16.0</version>
-    <scope>compile</scope>
-</dependency>
 		<dependency>
     <groupId>org.apache.camel</groupId>
     <artifactId>camel-jsonpath</artifactId>
@@ -98,7 +82,8 @@
     <groupId>org.apache.camel.springboot</groupId>
     <artifactId>camel-jacksonxml-starter</artifactId>
     	<version>4.16.0</version>
-    	</dependency>
+</dependency>
+
 		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-activemq-starter</artifactId>
@@ -113,6 +98,7 @@
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-client</artifactId>
 		</dependency>
+		<!-- Camel YAML DSL -->
 		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-yaml-dsl-starter</artifactId>
@@ -133,17 +119,21 @@
 			<artifactId>camel-yaml-dsl</artifactId>
 			<version>4.16.0</version>
 		</dependency>
+		<!-- DevTools (Optional) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+
+		<!-- Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 	<build>

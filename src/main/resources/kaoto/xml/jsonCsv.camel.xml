@@ -1,0 +1,21 @@
+<!-- <camel xmlns="http://camel.apache.org/schema/spring">
+    <route id="route-sale-data">
+        <from id="from-2074" uri="file:src/main/resources/input"/>
+        <log message="INPUT JSON = ${body}"/>
+        <step id="saleOrder_JsonCSV-4989fd4d">
+            <to id="kaoto-datamapper-xslt-1619" uri="xslt-saxon:saleOrder_JsonCSV.xsl?failOnNullBody=false&amp;useJsonBody=true"/>
+        </step>
+        <log id="log-after-xslt" message="BODY AFTER XSLT = ${body}"/>
+        <unmarshal id="unmarshal-json">
+            <json/>
+        </unmarshal>
+        <log id="log-after-unmarshal" message="BODY AFTER UNMARSHAL = ${body}"/>
+        <setBody id="setBody-csv">
+            <simple>
+                ${body[orderNumber]}|${body[customerNumber]}|${body[customerName]}|${body[formattedDate]}|${body[amount]}|${body[currencyCode]}
+            </simple>
+        </setBody>
+        <log id="log-final" message="FINAL CSV RECORD = ${body}"/>
+        <poll id="to-order" uri="file:src/main/resources/output?fileName=orders-${date:now:yyyyMMdd}.csv&amp;fileExist=Override"/>
+    </route>
+</camel> -->

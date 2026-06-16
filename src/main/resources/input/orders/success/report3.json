@@ -1,0 +1,14 @@
+[
+  {
+    "reportId": "R1004",
+    "customerName": "Jam",
+    "region": "Latam",
+    "salesAmount": 4500
+  },
+  {
+    "reportId": "R1005",
+    "customerName": "Siri",
+    "region": "MX",
+    "salesAmount": 6700
+  }
+]

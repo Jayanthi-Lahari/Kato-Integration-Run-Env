@@ -1,0 +1,38 @@
+- errorHandler:
+    deadLetterChannel:
+      deadLetterUri: activemq:queue:SaleOrder-DLQ
+- route:
+    id: route-json-csv
+    from:
+      id: from-2074
+      uri: file
+      parameters:
+        directoryName: src/main/resources/input
+        readLock: changed
+      steps:
+        - convertBodyTo:
+            id: convertBodyTo-3830
+            type: java.lang.String
+        - wireTap:
+            id: wireTap-4058
+            uri: direct:audit-success
+        - to:
+            id: saleOrder-JsonCSV-xslt-1619
+            uri: xslt-saxon:kaoto/xslt/saleOrder_JsonCSV.xsl
+            parameters:
+              failOnNullBody: false
+              useJsonBody: true
+        - unmarshal:
+            id: unmarshal-json
+            json: {}
+        - setBody:
+            id: setBody-8743
+            simple:
+              expression: ${body[orderNumber]}|${body[customerNumber]}|${body[customerName]}|${body[formattedDate]}|${body[amount]}|${body[currencyCode] \n}
+        - to:
+            id: file-output
+            uri: file
+            parameters:
+              directoryName: src/main/resources/output/orders
+              fileName: order-${date:now:yyyyMMdd}.csv
+              fileExist: Append

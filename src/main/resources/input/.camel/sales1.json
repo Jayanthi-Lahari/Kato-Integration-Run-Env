@@ -1,0 +1,10 @@
+{
+  "salesOrderId": "SO1001",
+  "customer": {
+    "customerId": "C101",
+    "name": "Jayanthi"
+  },
+  "orderDate": "2026-06-12",
+  "totalAmount": 2500,
+  "currency": "INR"
+}

@@ -1,0 +1,58 @@
+#- route:
+#    id: route-3590
+#    from:
+#      id: from-6932
+#      uri: file
+#      parameters:
+#        directoryName: src/main/resources/input/orders
+##        include: .*\\.json
+#      steps:
+#        - unmarshal:
+#            id: unmarshal-2915
+#            json: {}
+#        - validate:
+#            id: validate-3592
+#            simple:
+#              expression: ${body.size} > 0
+#        - split:
+#            id: split-3535
+#            jsonpath: $[*]
+#            steps:
+#              - setBody:
+#                  id: setBody-3921
+#                  simple:
+#                    expression: |-
+#                      {
+#                        "reportId": "${body[reportId]}",
+#                        "customerName": "${body[customerName]}",
+#                        "region": "${body[region]}",
+#                        "salesAmount": "${body[salesAmount]}",
+#                        "processedTime": "${date:now:yyyy-MM-dd HH:mm:ss}"
+#                      }
+#              - convertBodyTo:
+#                  id: convertBodyTo-1662
+#                  type: org.bson.Document
+#              - to:
+#                  id: to-8998
+#                  uri: mongodb
+#                  parameters:
+#                    connectionBean: mongoBean
+#                    database: kaoto
+#                    collection: raw_report_records
+#                    operation: insert
+#        - setBody:
+#            id: setBody-2508
+#            simple:
+#              expression: |-
+#                {
+#                  "routeId": "${routeId}",
+#                  "exchangeId": "${exchangeId}",
+#                  "status": "SUCCESS",
+#                  "processedFile": "${header.CamelFileName}",
+#                  "processedAt": "${date:now:yyyy-MM-dd HH:mm:ss}"
+#                }
+#        - to:
+#            id: to-2348
+#            uri: direct
+#            parameters:
+#              name: audit-success
