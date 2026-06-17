@@ -3,7 +3,7 @@
     exception:
       - java.lang.Exception
     handled:
-      constant: true
+      constant: "true"
     steps:
       - setBody:
           simple:

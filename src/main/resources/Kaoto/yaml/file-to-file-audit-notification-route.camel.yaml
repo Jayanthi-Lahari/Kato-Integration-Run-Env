@@ -45,6 +45,7 @@
                 "startTime": "${header.startTime}",
                 "endTime": "${date:now:yyyy-MM-dd HH:mm:ss}",
                 "fileName": "${header.CamelFileName}",
+                "folder" : "${header.errorMessage}",
                 "status": "FAILED",
                 "errorMessage": "${header.errorMessage}"
               }
@@ -95,9 +96,6 @@
             parameters:
               directoryName: src/main/resources/output/test
               autoCreate: false
-        - log:
-            id: targetHeaders
-            message: ${headers}
         - wireTap:
             id: wireTap-2265
             uri: direct:audit-route

@@ -1,0 +1,108 @@
+- onException:
+    id: No-Trigger-Files-Exception
+    handled:
+      constant: "true"
+    exception:
+      - com.exception.TriggerFileNotFoundException
+      - java.lang.Exception
+    description: Missing-DoneFile-Exception
+    steps:
+      - log:
+          id: log-1877
+          message: Headers=${headers} | Properties=${exchange.properties}
+          logName: exception log
+      - bean:
+          id: bean-exception
+          method: exceptions
+          description: Monitor-Bean
+          ref: MonitorLogs
+      - to:
+          id: to-delivery
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            collection: Exceptions
+            database: kaoto
+            operation: insert
+          description: Delivery DB
+- route:
+    id: Delivery File Monitor Route
+    from:
+      id: Delivery-Timer
+      uri: timer
+      parameters:
+        period: "300000"
+        timerName: Delivery-Timer
+      steps:
+        - setHeader:
+            id: setHeader-3645
+            name: startTime
+            simple:
+              expression: ${date:now:yyyy-MM-dd HH:mm:ss}
+        - pollEnrich:
+            id: pollEnrich-1565
+            simple:
+              expression: file:src/main/resources/input/orders?include=.*\.xml&doneFileName=delivery.trg&noop=false
+            timeout: "1000"
+        - log:
+            id: log-1777
+            message: audit ${headers} body ${body}
+            description: Audit log
+        - choice:
+            id: choice-2920
+            when:
+              - id: when-2005
+                steps:
+                  - to:
+                      id: to-delivery
+                      uri: activemq
+                      parameters:
+                        destinationName: Delivery Processing System
+                      description: DPS
+                simple:
+                  expression: ${body} != null
+            otherwise:
+              id: otherwise-2938
+              steps:
+                - throwException:
+                    id: throwException-3609
+                    exceptionType: com.exception.TriggerFileNotFoundException
+                    message: No XML file found with matching trigger file
+                    description: TriggerFileNotFoundException
+        - log:
+            id: log-1777-2570
+            message: sucess audit ${headers} body ${body}
+            description: Audit log
+        - wireTap:
+            id: wireTap-audit
+            description: delivery-Audit
+            uri: direct:delivery-Audit
+      description: " DMS"
+    description: Delivery Management System
+- route:
+    id: Audit
+    from:
+      id: from-2798
+      uri: direct
+      parameters:
+        name: delivery-Audit
+      steps:
+        - bean:
+            id: bean-audit
+            description: Monitor-Bean
+            method: audit
+            ref: MonitorLogs
+        - to:
+            id: to-Audit
+            uri: mongodb
+            parameters:
+              connectionBean: mongoBean
+              collection: Audit
+              database: kaoto
+              operation: insert
+              password: admin
+              username: admin
+            description: Delivery DB
+- beans:
+    - name: MonitorLogs
+      type: com.common.MonitorLogs

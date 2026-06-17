@@ -62,11 +62,21 @@
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-registry-prometheus</artifactId>
+    <scope>compile</scope>
+</dependency>
 		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-mail-starter</artifactId>
 			<version>4.16.0</version>
 		</dependency>
+		<dependency>
+    <groupId>org.apache.camel</groupId>
+    <artifactId>camel-support</artifactId>
+    <version>4.16.0</version>
+</dependency>
 		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-jackson-starter</artifactId>
