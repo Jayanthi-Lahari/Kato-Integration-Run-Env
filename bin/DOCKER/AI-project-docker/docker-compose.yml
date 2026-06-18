@@ -1,0 +1,99 @@
+services:
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: skill-gap-ai-backend
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env
+
+    environment:
+      PYTHONPATH: /app
+      WATCHFILES_FORCE_POLLING: "true"
+      OLLAMA_BASE_URL: http://ollama:11434
+
+    depends_on:
+      - mongodb
+      - ollama
+
+    volumes:
+      - .:/app
+
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+
+    restart: unless-stopped
+
+    command: >
+      sh -c "
+      echo 'Waiting for Ollama...' &&
+      sleep 20 &&
+      uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+  mongodb:
+    image: mongo:6.0
+
+    container_name: skill-gap-mongodb
+
+    ports:
+      - "27017:27017"
+
+    volumes:
+      - mongo_data:/data/db
+
+    restart: unless-stopped
+
+  mongo-express:
+    image: mongo-express:1.0.2
+
+    container_name: skill-gap-mongo-ui
+
+    ports:
+      - "8081:8081"
+
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongodb:27017/
+      ME_CONFIG_BASICAUTH: "false"
+
+    depends_on:
+      - mongodb
+
+    restart: unless-stopped
+
+  ollama:
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+
+    container_name: skillgap-ollama
+
+    ports:
+      - "11434:11434"
+
+    volumes:
+      - ollama_data:/root/.ollama
+
+    restart: unless-stopped
+
+    environment:
+      OLLAMA_HOST: 0.0.0.0
+      GODEBUG: x509ignoreCN=0
+      OLLAMA_NO_VERIFY: "1"
+
+    dns:
+        - 8.8.8.8
+        - 1.1.1.1
+
+    command: serve
+
+volumes:
+  mongo_data:
+  ollama_data:

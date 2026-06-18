@@ -1,0 +1,87 @@
+<camel xmlns="http://camel.apache.org/schema/spring">
+
+    <!-- ========================= -->
+    <!-- GLOBAL EXCEPTION HANDLER  -->
+    <!-- ========================= -->
+    <onException id="onException-global">
+        <exception>java.lang.Exception</exception>
+
+        <handled>
+            <constant>true</constant>
+        </handled>
+
+        <setBody>
+            <simple>
+{
+  "status":"FAILED",
+  "routeId":"${routeId}",
+  "error":"${exception.message}",
+  "payload":"${body}",
+  "timestamp":"${date:now:yyyy-MM-dd HH:mm:ss}"
+}
+            </simple>
+        </setBody>
+
+        <to uri="activemq:queue:inventory.DLQ"/>
+    </onException>
+
+    <!-- ========================= -->
+    <!-- INTERCEPT (AUDIT LOGGING) -->
+    <!-- ========================= -->
+    <intercept id="intercept-1737">
+
+        <setHeader name="auditTimestamp">
+            <simple>${date:now:yyyy-MM-dd HH:mm:ss}</simple>
+        </setHeader>
+
+        <setHeader name="auditRoute">
+            <simple>${routeId}</simple>
+        </setHeader>
+
+        <setBody>
+            <simple>
+{
+  "timestamp": "${header.auditTimestamp}",
+  "routeId": "${header.auditRoute}",
+  "exchangeId": "${exchangeId}",
+  "payload": ${body}
+}
+            </simple>
+        </setBody>
+
+        <to uri="file:src/main/resources/audit?fileName=audit-2026-06-05.json&amp;fileExist=Append"/>
+
+    </intercept>
+
+    <!-- ========================= -->
+    <!-- MAIN ROUTE               -->
+    <!-- ========================= -->
+    <route id="warehouse-to-inventory">
+
+        <from uri="activemq:queue:warehouse"/>
+
+        <choice>
+
+            <!-- VALID INVENTORY -->
+            <when>
+                <jsonpath>$[?(@.productId != null)]</jsonpath>
+
+                <to uri="xslt-saxon:xslt/inventory-mapping.xsl?failOnNullBody=false"/>
+
+                <to uri="activemq:queue:inventory"/>
+
+            </when>
+
+            <!-- INVALID INVENTORY -->
+            <otherwise>
+                <throwException>
+                    <exceptionType>java.lang.Exception</exceptionType>
+                    <message>Invalid Inventory Payload</message>
+                </throwException>
+            </otherwise>
+
+        </choice>
+
+    </route>
+
+</camel>

@@ -1,0 +1,150 @@
+- onException:
+    id: Exception-route
+    description: Global Exception Handling Route
+    steps:
+      - setHeaders:
+          id: Headers-exception
+          description: Capture Failure Timestamp
+          headers:
+            - name: failedTime
+              simple:
+                expression: ${date:now:yyyy-MM-dd HH:mm:ss}
+      - choice:
+          id: choice-3335
+          description: Format Error Message Based on Exception Type
+          when:
+            - id: when-9703
+              simple:
+                expression: ${exception.message} contains 'Cannot store file'
+              steps:
+                - setHeader:
+                    id: setHeader-1881
+                    description: Set Directory Not Found Error Message
+                    name: errorMessage
+                    simple:
+                      expression: Target directory path does not exist and
+                        ${exception.message.replaceAll('\\','/')}
+          otherwise:
+            id: otherwise-1440
+            steps:
+              - setHeader:
+                  id: setHeader-3024
+                  description: Set Original Exception Message
+                  name: errorMessage
+                  simple:
+                    expression: ${exception.message}
+      - to:
+          id: notification
+          description: Send Failure Email Notification
+          uri: bean
+          parameters:
+            beanName: mailNotificationBean
+            method: failureNotification('{{alert.to.email}}')
+      - setBody:
+          description: Build Exception Audit Document
+          simple:
+            expression: |-
+              {
+                "routeId": "${routeId}",
+                "exchangeId": "${exchangeId}",
+                "startTime": "${header.startTime}",
+                "endTime": "${date:now:yyyy-MM-dd HH:mm:ss}",
+                "fileName": "${header.CamelFileName}",
+                "folder" : "${header.errorMessage}",
+                "status": "FAILED",
+                "errorMessage": "${header.errorMessage}"
+              }
+      - convertBodyTo:
+          id: convertBodyTo-2702
+          description: Convert Exception Payload to MongoDB Document
+          type: org.bson.Document
+      - to:
+          id: to-2262
+          description: Store Exception Details in MongoDB
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            collection: Exceptions
+            operation: insert
+            database: kaoto
+    handled:
+      constant: "true"
+    exception:
+      - java.lang.Exception
+      - java.io.FileNotFoundException
+
+- route:
+    id: file-to-file-notification
+    description: Process Order Files and Trigger Audit Logging
+    from:
+      id: start
+      description: Read Order Files from Input Directory
+      uri: file
+      parameters:
+        directoryName: src/main/resources/input/orders
+        noop: false
+        moveFailed: error/${file:name}
+        includeExt: json
+        move: success/${file:name}
+      steps:
+        - setHeaders:
+            id: setHeaders-3455
+            description: Capture File Processing Metadata
+            headers:
+              - name: exchangeId
+                simple:
+                  expression: ${exchangeId}
+              - name: routeId
+                simple:
+                  expression: ${routeId}
+              - name: startTime
+                simple:
+                  expression: ${date:now:yyyy-MM-dd HH:mm:ss}
+        - to:
+            id: to-2676
+            description: Write File to Target Output Directory
+            uri: file
+            parameters:
+              directoryName: src/main/resources/output/test
+              autoCreate: false
+        - wireTap:
+            id: wireTap-2265
+            description: Trigger Audit Logging Route
+            uri: direct:audit-route
+
+- route:
+    id: audit-route
+    description: Store Successful File Processing Audit Records
+    from:
+      id: audit-start
+      description: Receive Audit Event from Main Route
+      uri: direct
+      parameters:
+        name: audit-route
+      steps:
+        - setBody:
+            description: Build Success Audit Document
+            simple:
+              expression: |-
+                {
+                  "routeId": "${routeId}",
+                  "exchangeId": "${exchangeId}",
+                  "startTime": "${header.startTime}",
+                  "endTime": "${date:now:yyyy-MM-dd HH:mm:ss}",
+                  "fileName": "${header.CamelFileName}",
+                  "Folder": "${header.CamelFileNameProduced.replaceAll('\\','/')}",
+                  "status": "SUCCESS"
+                }
+        - convertBodyTo:
+            id: convertBodyTo-1825
+            description: Convert Audit Payload to MongoDB Document
+            type: org.bson.Document
+        - to:
+            id: audit-db
+            description: Store Success Audit Record in MongoDB
+            uri: mongodb
+            parameters:
+              database: kaoto
+              collection: Audit
+              operation: insert
+              connectionBean: mongoBean

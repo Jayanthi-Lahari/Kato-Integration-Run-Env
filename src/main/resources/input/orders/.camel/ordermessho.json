@@ -1,0 +1,7 @@
+{
+  "orderId": 1001,
+  "customerName": "John Doe",
+  "product": "Laptop",
+  "quantity": 1,
+  "amount": 75000
+}

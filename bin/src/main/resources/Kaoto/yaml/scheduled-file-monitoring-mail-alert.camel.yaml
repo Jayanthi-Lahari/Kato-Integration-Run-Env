@@ -1,0 +1,57 @@
+- onException:
+    id: onException-1317
+    handled:
+      constant: true
+    exception:
+      - java.lang.Exception
+    steps:
+      - setBody:
+          simple:
+            expression: >
+              {
+                "from": "{{alert.from.email}}",
+                "to": ["{{alert.to.email}}"],
+                "subject": "Camel File Processing Failure",
+                "html": "<h2>File Processing Failed</h2><p><b>Route:</b> ${routeId}</p><p><b>Error:</b> ${exception.message}</p><p><b>Time:</b> ${date:now:yyyy-MM-dd HH:mm:ss}</p>"
+              }
+      - setHeaders:
+          headers:
+            - name: Content-Type
+              constant:
+                expression: application/json
+            - name: Authorization
+              simple:
+                expression: Bearer {{resend.api.key}}
+      - to:
+          uri: "https://api.resend.com/emails?httpMethod=POST"
+      - log:
+          message: Failure email notification sent successfully
+- route:
+    id: order-file-monitor-route
+    from:
+      uri: timer
+      parameters:
+        timerName: orderScheduler
+        period: 3000
+      steps:
+        - pollEnrich:
+            simple:
+              expression: file:src/main/resources/input/orders?include=order.*\\.json&noop=false
+            timeout: "1000"
+        - choice:
+            when:
+              - simple:
+                  expression: ${body} != null
+                steps:
+                  - log:
+                      message: "File Found : ${header.CamelFileName}"
+                  - to:
+                      id: to-2349
+                      uri: activemq
+                      parameters:
+                        destinationName: order_Stored
+            otherwise:
+              steps:
+                - throwException:
+                    exceptionType: java.lang.RuntimeException
+                    message: No File Found in Orders Folder

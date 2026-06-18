@@ -1,0 +1,9 @@
+<sale>
+  <saleId>5001</saleId>
+  <orderNumber>1001</orderNumber>
+  <customerNumber>C001</customerNumber>
+  <customerName>John</customerName>
+  <saleDate>2026-06-18</saleDate>
+  <amount>1200</amount>
+  <currency>USD</currency>
+</sale>

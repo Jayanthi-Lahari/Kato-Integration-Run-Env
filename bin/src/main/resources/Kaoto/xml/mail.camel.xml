@@ -1,0 +1,59 @@
+<route id="insurance-email-route">
+
+    <from uri="file:src/main/resources/input?noop=true"/>
+
+    <unmarshal>
+        <json autoDiscoverObjectMapper="true"/>
+    </unmarshal>
+
+    <choice>
+
+        <when>
+            <simple>${body[email]} != null</simple>
+
+            <!-- REQUIRED MAIL HEADERS -->
+            <setHeader name="To">
+                <simple>${body[email]}</simple>
+            </setHeader>
+
+            <setHeader name="Subject">
+                <simple>Insurance Claim - ${body[claimId]}</simple>
+            </setHeader>
+
+            <setHeader name="From">
+                <simple>{{mail.username}}</simple>
+            </setHeader>
+
+            <!-- BODY -->
+            <setBody>
+                <simple>
+Dear ${body[customerName]},
+
+Your claim ${body[claimId]} has been processed successfully.
+
+Amount: ${body[claimAmount]}
+
+Regards,
+Insurance Team
+                </simple>
+            </setBody>
+
+            <!-- EMAIL SEND -->
+            <to uri="smtp://smtp.gmail.com:587?username={{mail.username}}
+                &amp;password={{mail.password}}
+                &amp;mail.smtp.auth=true
+                &amp;mail.smtp.starttls.enable=true
+                &amp;mail.smtp.starttls.required=true
+                &amp;mail.smtp.connectiontimeout=10000
+                &amp;mail.smtp.timeout=10000
+                &amp;mail.smtp.writetimeout=10000"/>
+
+        </when>
+
+        <otherwise>
+            <log message="Invalid payload - missing email"/>
+        </otherwise>
+
+    </choice>
+
+</route>

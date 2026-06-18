@@ -1,0 +1,101 @@
+- onException:
+    id: No-Trigger-Files-Exception
+    description: Handle Missing Trigger Files and Processing Exceptions
+    handled:
+      constant: "true"
+    exception:
+      - com.exception.TriggerFileNotFoundException
+      - java.lang.Exception
+    steps:
+      - bean:
+          id: bean-exception
+          description: Build Exception Audit Document
+          method: exceptions
+          ref: MonitorLogs
+      - to:
+          id: to-delivery
+          description: Store Exception Record in MongoDB
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            collection: Exceptions
+            database: kaoto
+            operation: insert
+- route:
+    id: Delivery File Monitor Route
+    description: Monitor Delivery Files and Publish to Delivery Processing System
+    from:
+      id: Delivery-Timer
+      description: Trigger Delivery File Scan Every 5 Minutes
+      uri: timer
+      parameters:
+        period: "300000"
+        timerName: Delivery-Timer
+      steps:
+        - pollEnrich:
+            id: pollEnrich-1565
+            description: Poll XML File Using Trigger File Validation
+            simple:
+              expression: file:src/main/resources/input/orders?include=.*\.xml&doneFileName=delivery.trg&noop=false
+            timeout: "1000"
+        - setHeader:
+            id: setHeader-3645
+            description: Capture Processing Start Time
+            name: startTime
+            simple:
+              expression: ${date:now:yyyy-MM-dd HH:mm:ss}
+        - choice:
+            id: choice-2920
+            description: Validate XML File Availability
+            when:
+              - id: when-2005
+                simple:
+                  expression: ${body} != null
+                steps:
+                  - to:
+                      id: to-delivery
+                      description: Publish Message to Delivery Processing System Queue
+                      uri: activemq
+                      parameters:
+                        destinationName: Delivery Processing System
+            otherwise:
+              id: otherwise-2938
+              steps:
+                - throwException:
+                    id: throwException-3609
+                    description: Raise Exception When XML or Trigger File Is Missing
+                    exceptionType: com.exception.TriggerFileNotFoundException
+                    message: No XML file found with matching trigger file
+        - wireTap:
+            id: wireTap-audit
+            description: Trigger Audit Logging Route
+            uri: direct:delivery-Audit
+- route:
+    id: Audit
+    description: Store Delivery Processing Audit Records
+    from:
+      id: from-2798
+      description: Receive Audit Events from Main Route
+      uri: direct
+      parameters:
+        name: delivery-Audit
+      steps:
+        - bean:
+            id: bean-audit
+            description: Build Audit Document
+            method: audit
+            ref: MonitorLogs
+        - to:
+            id: to-Audit
+            description: Store Audit Record in MongoDB
+            uri: mongodb
+            parameters:
+              connectionBean: mongoBean
+              collection: Audit
+              database: kaoto
+              operation: insert
+              password: admin
+              username: admin
+- beans:
+    - name: MonitorLogs
+      type: com.common.MonitorLogs

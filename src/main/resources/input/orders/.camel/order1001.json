@@ -1,0 +1,11 @@
+{
+  "orderId": 1001,
+  "customerId": "CUST001",
+  "customerName": "John Doe",
+  "productId": "PRD101",
+  "productName": "Laptop",
+  "quantity": 1,
+  "unitPrice": 75000,
+  "totalAmount": 75000,
+  "orderDate": "2026-06-18"
+}

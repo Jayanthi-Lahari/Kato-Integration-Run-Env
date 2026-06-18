@@ -1,0 +1,78 @@
+- onException:
+    id: file-processing-exception
+    description: Handle File Processing Failures and Send Notifications
+    exception:
+      - java.lang.Exception
+    handled:
+      constant: "true"
+    steps:
+      - setBody:
+          description: Create Failure Audit Log Entry
+          simple:
+            expression: |2
+               ==========================================
+              STATUS : FAILED
+              ROUTE  : ${routeId}
+              ERROR  : ${exception.message}
+              TIME   : ${date:now:yyyy-MM-dd HH:mm:ss}
+                      ==========================================
+      - to:
+          description: Write Failure Audit Record
+          uri: file
+          parameters:
+            directoryName: audit/failure
+            fileName: file-processing-failure-audit.log
+            fileExist: Append
+      - bean:
+          description: Send Failure Email Notification
+          ref: mailNotificationBean
+          method: sendFailureNotification('{{alert.to.email}}','${routeId}','${exception.message}')
+- route:
+    id: order-file-monitor-route
+    description: Monitor Orders Directory and Publish Files to ActiveMQ
+    from:
+      uri: timer
+      description: Trigger Order File Scan at Scheduled Interval
+      parameters:
+        timerName: orderScheduler
+        period: 300000
+      steps:
+        - pollEnrich:
+            description: Poll Order JSON File from Input Directory
+            simple:
+              expression: file:src/main/resources/input/orders?include=order.*\.json&noop=false
+            timeout: "1000"
+        - choice:
+            description: Validate Order File Availability
+            when:
+              - simple:
+                  expression: ${body} != null
+                steps:
+                  - to:
+                      description: Publish Order File to ActiveMQ Queue
+                      uri: activemq
+                      parameters:
+                        destinationName: order_Stored
+                  - setBody:
+                      description: Create Success Audit Log Entry
+                      simple:
+                        expression: |
+                          ==========================================
+                           STATUS : SUCCESS
+                          FILE   : ${header.CamelFileName}
+                          ROUTE  : ${routeId}
+                          TIME   : ${date:now:yyyy-MM-dd HH:mm:ss}
+                                  ==========================================
+                  - to:
+                      description: Write Success Audit Record
+                      uri: file
+                      parameters:
+                        directoryName: audit/success
+                        fileName: file-processing-success-audit.log
+                        fileExist: Append
+            otherwise:
+              steps:
+                - throwException:
+                    description: Raise Exception When No Order File Is Available
+                    exceptionType: java.lang.RuntimeException
+                    message: No File Found in Source Endpoint

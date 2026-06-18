@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DeliveryOrder>
+    <OrderId>ORD-10001</OrderId>
+    <Customer>
+        <CustomerId>CUST-5001</CustomerId>
+        <Name>rr</Name>
+        <Phone>9876543210</Phone>
+        <Email>john.doe@example.com</Email>
+    </Customer>
+    <Delivery>
+        <Address>
+            <Street>123 Main Street</Street>
+            <City>Nellore</City>
+            <State>Andhra Pradesh</State>
+            <PostalCode>524001</PostalCode>
+            <Country>India</Country>
+        </Address>
+        <DeliveryDate>2026-06-18</DeliveryDate>
+        <DeliveryType>Standard</DeliveryType>
+    </Delivery>
+    <Items>
+        <Item>
+            <ProductId>P1001</ProductId>
+            <ProductName>Laptop</ProductName>
+            <Quantity>1</Quantity>
+            <Price>55000.00</Price>
+        </Item>
+        <Item>
+            <ProductId>P1002</ProductId>
+            <ProductName>Wireless Mouse</ProductName>
+            <Quantity>2</Quantity>
+            <Price>1200.00</Price>
+        </Item>
+    </Items>
+    <TotalAmount>57400.00</TotalAmount>
+    <Status>PENDING</Status>
+</DeliveryOrder>

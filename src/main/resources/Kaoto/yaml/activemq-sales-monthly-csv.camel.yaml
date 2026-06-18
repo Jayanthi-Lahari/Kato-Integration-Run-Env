@@ -1,0 +1,105 @@
+- onException:
+    id: No-Trigger-Files-Exception
+    description: Handle Missing Trigger Files and Processing Exceptions
+    handled:
+      constant: "true"
+    exception:
+      - com.exception.TriggerFileNotFoundException
+      - java.lang.Exception
+    steps:
+      - bean:
+          id: bean-exception
+          description: Build Failure Audit Document
+          method: updateFailureAudit
+          ref: MonitorLogs
+
+      - to:
+          id: to-exception-db
+          description: Store Exception Record in MongoDB
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            collection: Exceptions
+            database: kaoto
+            operation: insert
+
+
+- route:
+    id: Delivery File Monitor Route
+    description: Sales XML → CSV Monthly File with WireTap Audit
+
+    from:
+      id: from-2165
+      uri: activemq
+      description: Consume Sales XML from ActiveMQ (Sales-System)
+      parameters:
+        destinationName: Sales-System
+        selector: contentType = 'application/xml'
+
+      steps:
+
+        # 🟢 START AUDIT (non-blocking)
+        - wireTap:
+            id: start-audit-wiretap
+            uri: direct:delivery-Audit
+            description: Start Audit Event (IN_PROGRESS)
+
+        # XML to Object
+        - unmarshal:
+            id: unmarshal-xml
+            jacksonXml: {}
+
+        # CSV conversion
+        - setBody:
+            id: csv-transform
+            simple:
+              expression: ${body.saleId}|${body.orderNumber}|${body.customerNumber}|${body.customerName}|${body.saleDate}|${body.amount}|${body.currency}\n
+
+        # Write monthly file
+        - to:
+            id: file-write
+            uri: file
+            description: Append CSV to Monthly File
+            parameters:
+              directoryName: src/main/resources/output/Monthly-Sales-Report
+              fileName: sales_${date:now:yyyy-MM}.csv
+              fileExist: Append
+
+        # 🟢 SUCCESS AUDIT (non-blocking)
+        - wireTap:
+            id: success-audit-wiretap
+            uri: direct:delivery-Audit
+            description: Success Audit Event
+
+
+- route:
+    id: Audit Route
+    description: Centralized Audit Storage Route (MongoDB)
+
+    from:
+      id: audit-from
+      uri: direct:delivery-Audit
+      description: Receive Audit Events from WireTap
+
+      steps:
+
+        - bean:
+            id: audit-bean
+            ref: MonitorLogs
+            method: auditHandler
+            description: Build Audit Document (Success / Failure / Start)
+
+        - to:
+            id: audit-db
+            uri: mongodb
+            description: Store Audit in MongoDB
+            parameters:
+              connectionBean: mongoBean
+              collection: Audit
+              database: kaoto
+              operation: insert
+
+
+- beans:
+    - name: MonitorLogs
+      type: com.common.MonitorLogs

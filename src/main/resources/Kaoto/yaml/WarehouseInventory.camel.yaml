@@ -1,0 +1,102 @@
+- onException:
+    exception:
+      - java.lang.Exception
+    handled:
+      constant: true
+    log:
+      message: "ERROR: ${exception.message}"
+
+    setBody:
+      simple: |
+        {
+          "status": "FAILED",
+          "routeId": "${routeId}",
+          "error": "${exception.message}",
+          "payload": "${body}",
+          "timestamp": "${date:now:yyyy-MM-dd HH:mm:ss}"
+        }
+
+    to:
+      uri: activemq:inventory.DLQ
+
+
+# =========================================================
+# ENTERPRISE INTERCEPTOR (Camel YAML correct format)
+# =========================================================
+- intercept:
+    log:
+      message: "Processing route ${routeId} | ExchangeId=${exchangeId}"
+
+    setHeader:
+      name: auditTimestamp
+      simple: "${date:now:yyyy-MM-dd HH:mm:ss}"
+
+    setHeader:
+      name: auditRoute
+      simple: "${routeId}"
+
+    setHeader:
+      name: correlationId
+      simple: "${exchangeId}"
+
+    setHeader:
+      name: sourceSystem
+      simple: "WAREHOUSE-MANAGEMENT-SYSTEM"
+
+    setHeader:
+      name: processingStartTime
+      simple: "${date:now:millis}"
+
+
+# =========================================================
+# MAIN ROUTE
+# =========================================================
+- route:
+    id: warehouse-to-inventory
+
+    from:
+      uri: activemq:warehouse
+
+    wireTap:
+      uri: direct:audit-route
+
+    choice:
+      when:
+        - simple: "${body[warehouseId]} != null"
+
+          marshal:
+            json: {}
+
+          to:
+            uri: xslt-saxon:classpath:xslt/inventory-mapping.xsl
+
+          to:
+            uri: activemq:inventory
+
+      otherwise:
+        throwException:
+          exceptionType: java.lang.IllegalArgumentException
+          message: "Invalid Payload: warehouseId missing"
+
+
+# =========================================================
+# AUDIT ROUTE
+# =========================================================
+- route:
+    id: audit-route
+
+    from:
+      uri: direct:audit-route
+
+    setBody:
+      simple: |
+        {
+          "timestamp": "${header.auditTimestamp}",
+          "routeId": "${header.auditRoute}",
+          "correlationId": "${header.correlationId}",
+          "sourceSystem": "${header.sourceSystem}",
+          "payload": "${body}"
+        }
+
+    to:
+      uri: file:src/main/resources/audit?fileName=audit-${date:now:yyyyMMdd}.json&fileExist=Append

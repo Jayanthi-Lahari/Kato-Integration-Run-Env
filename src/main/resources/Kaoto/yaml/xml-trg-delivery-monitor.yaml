@@ -1,0 +1,88 @@
+- onException:
+    id: No-Trigger-Files-Exception
+    handled:
+      constant: "true"
+    exception:
+      - com.exception.TriggerFileNotFoundException
+      - java.lang.Exception
+    description: Missing-DoneFile-Exception
+    steps:
+      - log:
+          id: log-1877
+          message: Headers=${headers} | Properties=${exchange.properties}
+          logName: exception log
+      - bean:
+          id: bean-exception
+          method: exceptions
+          description: Monitor-Bean
+          ref: MonitorLogs
+      - to:
+          id: to-delivery
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            collection: Exceptions
+            database: kaoto
+            operation: insert
+          description: Delivery DB
+- route:
+    id: Delivery File Monitor Route
+    from:
+      id: from-1523
+      uri: file
+      parameters:
+        directoryName: src/main/resources/input
+        doneFileName: ${file:name.noext}.trg
+        noop: false
+        includeExt: xml
+        delay: 300000
+        useFixedDelay: true
+      steps:
+        - setHeader:
+            id: setHeader-3645
+            name: startTime
+            simple:
+              expression: ${date:now:yyyy-MM-dd HH:mm:ss}
+        - to:
+            id: to-delivery
+            uri: activemq
+            parameters:
+              destinationName: Delivery Processing System
+            description: DPS
+        - log:
+            id: log-1777-2570
+            message: sucess audit ${headers} body ${body}
+            description: Audit log
+        - wireTap:
+            id: wireTap-audit
+            description: delivery-Audit
+            uri: direct:delivery-Audit
+      description: " DMS"
+    description: Delivery Management System
+- route:
+    id: Audit
+    from:
+      id: from-2798
+      uri: direct
+      parameters:
+        name: delivery-Audit
+      steps:
+        - bean:
+            id: bean-audit
+            description: Monitor-Bean
+            method: audit
+            ref: MonitorLogs
+        - to:
+            id: to-Audit
+            uri: mongodb
+            parameters:
+              connectionBean: mongoBean
+              collection: Audit
+              database: kaoto
+              operation: insert
+              password: admin
+              username: admin
+            description: Delivery DB
+- beans:
+    - name: MonitorLogs
+      type: com.common.MonitorLogs

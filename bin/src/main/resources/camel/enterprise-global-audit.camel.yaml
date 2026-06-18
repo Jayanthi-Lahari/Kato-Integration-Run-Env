@@ -1,0 +1,13 @@
+- route:
+    id: route-1564
+    from:
+      id: from-1124
+      uri: direct
+      parameters:
+        name: audit-success
+      steps:
+        - to:
+            id: to-2590
+            uri: activemq
+            parameters:
+              destinationName: Audit
