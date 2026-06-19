@@ -1,0 +1,114 @@
+- onException:
+    id: queue-exception-handler
+    description: Handle ActiveMQ queue processing failures and runtime exceptions
+    handled:
+      constant: "true"
+    exception:
+      - java.lang.Exception
+    steps:
+      - log:
+          id: log-4346
+          message: ${headers} ----------- ${body}
+      - bean:
+          id: build-queue-exception
+          description: Build failure audit document from ActiveMQ queue message
+          method: exceptionHandler
+          ref: GlobalMnitor
+      - to:
+          id: save-queue-exception-db
+          description: Store queue processing exception in MongoDB Exceptions collection
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            collection: Exceptions
+            database: kaoto
+            operation: insert
+- route:
+    id: sales-queue-to-file-route
+    description: Consume sales messages from ActiveMQ queue and generate monthly CSV file
+    from:
+      id: sales-queue-consumer
+      description: ActiveMQ Sales-System queue consumer (source system)
+      uri: activemq
+      parameters:
+        destinationName: Sales-System
+      steps:
+        - setHeaders:
+            id: audit-header
+            description: Start Event
+            headers:
+              - name: targetEndpoint
+                simple:
+                  expression: sales_${date:now:yyyy-MM}.csv
+              - name: auditEvent
+                constant:
+                  expression: START
+              - name: startTime
+                simple:
+                  expression: ${date:now:yyyy-MM-dd HH:mm:ss}
+        - wireTap:
+            id: tap-start-audit
+            description: Send START audit event to central audit route
+            uri: direct:Sales-Audit
+        - unmarshal:
+            id: xml-to-object
+            jacksonXml: {}
+            description: " Convert ActiveMQ XML message to Java object"
+        - setBody:
+            id: convert-to-csv
+            description: Transform queue message into CSV format
+            simple:
+              expression: ${body[saleId]}|${body[orderNumber]}|${body[customerNumber]}|${body[customerName]}|${body[saleDate]}|${body[amount]}|${body[currency]}\n
+        - to:
+            id: write-monthly-file
+            description: Write transformed message into monthly CSV file
+            uri: file
+            parameters:
+              directoryName: src/main/resources/output/Monthly-Sales-Report
+              fileName: sales_${date:now:yyyy-MM}.csv
+              fileExist: Append
+        - setHeaders:
+            id: audit-success-header
+            headers:
+              - name: auditEvent
+                simple:
+                  expression: SUCCESS
+              - name: targetEndpoint
+                description: ""
+                simple:
+                  expression: ${header.CamelFileNameProduced}
+            description: Success Event
+        - log:
+            id: log-1917
+            message: ${headers}
+        - wireTap:
+            id: tap-success-audit
+            description: Send SUCCESS audit event to audit route
+            uri: direct:Sales-Audit
+- route:
+    id: audit-processing-route
+    description: Central audit processor for queue-to-file integration flow
+    from:
+      id: audit-consumer
+      description: Receive audit events from queue processing route
+      uri: direct
+      parameters:
+        name: Sales-Audit
+      steps:
+        - bean:
+            id: build-audit-document
+            description: Build unified audit document from queue processing flow
+            method: auditHandler
+            ref: GlobalMnitor
+        - to:
+            id: save-audit-mongo
+            description: Store audit record in MongoDB Audit collection
+            uri: mongodb
+            parameters:
+              connectionBean: mongoBean
+              collection: Audit
+              database: kaoto
+              operation: save
+- beans:
+    - name: GlobalMnitor
+      type: com.common.GlobalMnitor

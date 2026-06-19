@@ -1,0 +1,9 @@
+<sales>
+    <saleId>S1001</saleId>
+    <orderNumber>ORD-501</orderNumber>
+    <customerNumber>CUST-100</customerNumber>
+    <customerName>Arjun Reddy</customerName>
+    <saleDate>2026-06-19</saleDate>
+    <amount>1250.75</amount>
+    <currency>INR</currency>
+</sales>
