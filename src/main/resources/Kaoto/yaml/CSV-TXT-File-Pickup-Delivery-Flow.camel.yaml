@@ -1,0 +1,85 @@
+- onException:
+    id: Empty-File-Or-Processing-Exception
+    handled:
+      constant: "true"
+    exception:
+      - java.lang.Exception
+    description: Handles empty file and processing exceptions
+    steps:
+      - bean:
+          id: bean-exception-monitor
+          method: exceptions
+          description: Error Body
+          ref: MonitorLogs
+      - to:
+          id: mongodb-exception-insert
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            collection: Exceptions
+            database: kaoto
+            operation: insert
+          description: Store Exception
+- route:
+    id: Trigger-Based-File-Transfer-Route
+    description: Process XML and CSV files only when corresponding trigger file exists
+    from:
+      id: file-monitor-endpoint
+      uri: file
+      parameters:
+        directoryName: src/main/resources/input
+        doneFileName: ${file:name.noext}.trg
+        noop: false
+        includeExt: xml,csv
+        useFixedDelay: false
+      steps:
+        - setHeader:
+            id: set-processing-start-time
+            name: startTime
+            simple:
+              expression: ${date:now:yyyy-MM-dd HH:mm:ss}
+            description: Start Monitor
+        - validate:
+            id: validate-5782
+            simple:
+              expression: ${CamelFileLength} > 0
+            description: EmptyFileCheck
+        - to:
+            id: activemq-file-delivery
+            uri: activemq
+            parameters:
+              destinationName: DeliveryProcessingSystem
+            description: Deliver
+        - wireTap:
+            id: wiretap-audit-route
+            description: Audit
+            uri: direct:delivery-Audit
+      description: Order
+- route:
+    id: File-Processing-Audit-Route
+    description: Store successful file processing audit records
+    from:
+      id: audit-route-entry
+      uri: direct
+      parameters:
+        name: delivery-Audit
+      steps:
+        - bean:
+            id: bean-audit-monitor
+            description: Audit Body
+            method: audit
+            ref: MonitorLogs
+        - to:
+            id: mongodb-audit-insert
+            uri: mongodb
+            parameters:
+              connectionBean: mongoBean
+              collection: Audit
+              database: kaoto
+              operation: insert
+              username: admin
+              password: admin
+            description: Store Audit
+- beans:
+    - name: MonitorLogs
+      type: com.common.MonitorLogs

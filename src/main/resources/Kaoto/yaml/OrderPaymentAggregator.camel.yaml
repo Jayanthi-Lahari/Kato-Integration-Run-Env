@@ -1,0 +1,171 @@
+- onException:
+    id: global-exception
+    description: Enterprise Error Management System
+    handled:
+      constant: "true"
+    exception:
+      - java.lang.Exception
+    steps:
+      - setHeader:
+          id: set-audit-failed
+          description: Exception Audit Status
+          name: auditEvent
+          constant: FAILED
+      - bean:
+          id: notify-failure
+          description: Notification Service
+          ref: mailNotificationBean
+          method: globalNotification
+      - to:
+          id: recovery-queue
+          description: Recovery Queue Service
+          uri: activemq
+          parameters:
+            destinationName: MissingMessage_Q
+      - bean:
+          id: build-exception-audit
+          description: Exception Audit Builder
+          ref: GlobalMnitor
+          method: exceptionHandler
+      - to:
+          id: save-exception
+          description: Exception Repository
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            database: kaoto
+            collection: Exceptions
+            operation: insert
+- route:
+    id: order-route
+    description: Order Management System
+    from:
+      uri: activemq
+      parameters:
+        destinationName: Order_In
+      steps:
+        - setHeaders:
+            id: order-audit-header
+            description: Order Audit Metadata
+            headers:
+              - name: auditEvent
+                constant: ORDER_RECEIVED
+              - name: startTime
+                simple: ${date:now:yyyy-MM-dd HH:mm:ss}
+        - wireTap:
+            id: order-audit
+            description: Audit Management System
+            uri: direct:Aggregate-Audit
+        - setProperty:
+            id: order-flag
+            description: Order Received Flag
+            name: orderReceived
+            constant: "true"
+        - to:
+            id: send-to-aggregate
+            description: Order Payment Correlation Engine
+            uri: direct
+            parameters:
+              name: Aggregate-Flow
+      description: Order_In
+- route:
+    id: payment-route
+    description: Payment Processing System
+    from:
+      uri: activemq
+      parameters:
+        destinationName: payment
+      steps:
+        - setHeaders:
+            id: payment-audit-header
+            description: Payment Audit Metadata
+            headers:
+              - name: auditEvent
+                constant: PAYMENT_RECEIVED
+              - name: startTime
+                simple: ${date:now:yyyy-MM-dd HH:mm:ss}
+        - wireTap:
+            id: payment-audit
+            description: Audit Management System
+            uri: direct:Aggregate-Audit
+        - setProperty:
+            id: payment-flag
+            description: Payment Received Flag
+            name: paymentReceived
+            constant: "true"
+        - to:
+            id: payment-to-aggregate
+            description: Order Payment Correlation Engine
+            uri: direct
+            parameters:
+              name: Aggregate-Flow
+      description: Payment_In
+- route:
+    id: aggregate-route
+    description: Order Payment Correlation Engine
+    from:
+      uri: direct
+      parameters:
+        name: Aggregate-Flow
+      steps:
+        - aggregate:
+            id: order-payment-aggregate
+            description: Order Payment Aggregator
+            correlationExpression:
+              simple: ${body[orderId]}
+            aggregationStrategy: "#OrderAggregationStrategy"
+            completionSize: 2
+            completionTimeout: "120000"
+            steps:
+              - process:
+                  id: validate-order-payment
+                  description: Business Validation Engine
+                  ref: AggregationValidationProcessor
+              - to:
+                  id: confirmation-queue
+                  description: Order_Confirmation
+                  uri: activemq
+                  parameters:
+                    destinationName: Confirmation
+              - setHeaders:
+                  id: success-audit-header
+                  description: Transaction Success Audit
+                  headers:
+                    - name: targetEndpoint
+                      simple:
+                        expression: ${exchangeProperty.CamelToEndpoint}
+                    - name: auditEvent
+                      constant: SUCCESS
+              - wireTap:
+                  id: success-audit
+                  description: Audit Management System
+                  uri: direct:Aggregate-Audit
+- route:
+    id: audit-route
+    description: Enterprise Audit Management System
+    from:
+      uri: direct
+      parameters:
+        name: Aggregate-Audit
+      steps:
+        - bean:
+            id: build-audit
+            description: Audit Document Generator
+            ref: GlobalMnitor
+            method: auditHandler
+        - to:
+            id: save-audit
+            description: Audit Repository
+            uri: mongodb
+            parameters:
+              connectionBean: mongoBean
+              database: kaoto
+              collection: Audit
+              operation: insert
+- beans:
+    - name: OrderAggregationStrategy
+      type: com.bean.OrderAggregationStrategy
+    - name: AggregationValidationProcessor
+      type: com.process.AggregationValidationProcessor
+    - name: GlobalMnitor
+      type: com.common.GlobalMnitor

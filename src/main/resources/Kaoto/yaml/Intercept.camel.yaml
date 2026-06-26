@@ -1,0 +1,96 @@
+- onException:
+    id: global-exception
+    description: Error Management System
+    handled:
+      constant: "true"
+    exception:
+      - java.lang.Exception
+    steps:
+      - setHeader:
+          id: set-audit-failed
+          description: Exception Audit Status
+          name: auditEvent
+          constant: FAILED
+      - bean:
+          id: build-exception-audit
+          description: Exception Audit Builder
+          ref: GlobalMnitor
+          method: exceptionHandler
+      - to:
+          id: save-exception
+          description: Exception Repository
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            database: kaoto
+            collection: Exceptions
+            operation: insert
+- interceptSendToEndpoint:
+    id: endpoint-interceptor
+    description: Capture All Target Endpoints
+    uri: "activemq:*"
+    steps:
+      - bean:
+          id: capture-target-endpoint
+          ref: GlobalMnitor
+          method: captureEndpoint
+- route:
+    id: Recipient-Order-List-Route
+    description: Order Management System
+    from:
+      uri: activemq
+      parameters:
+        destinationName: Confrimed_Order
+      steps:
+        - setHeaders:
+            id: order-audit-header
+            description: Order Audit Metadata
+            headers:
+              - name: auditEvent
+                constant: ORDER_RECEIVED
+              - name: startTime
+                simple: ${date:now:yyyy-MM-dd HH:mm:ss}
+        - wireTap:
+            id: order-start-audit
+            description: Audit Management System
+            uri: direct:Aggregate-Audit
+        - recipientList:
+            id: distribute-order
+            description: Send Order To Multiple Business Systems
+            constant:
+              expression: activemq:Billing_Q,activemq:Inventory_Q,activemq:Shipping_Q
+        - setHeader:
+            id: success-status
+            description: Transaction Status
+            name: auditEvent
+            constant: SUCCESS
+        - wireTap:
+            id: order-success-audit
+            description: Audit Management System
+            uri: direct:Aggregate-Audit
+      description: Order
+- route:
+    id: audit-route
+    description: Audit Management System
+    from:
+      uri: direct
+      parameters:
+        name: Aggregate-Audit
+      steps:
+        - bean:
+            id: build-audit
+            description: Audit Document Generator
+            ref: GlobalMnitor
+            method: auditHandler
+        - to:
+            id: save-audit
+            description: Audit Repository
+            uri: mongodb
+            parameters:
+              connectionBean: mongoBean
+              database: kaoto
+              collection: Audit
+              operation: insert
+- beans:
+    - name: GlobalMnitor
+      type: com.common.GlobalMnitor

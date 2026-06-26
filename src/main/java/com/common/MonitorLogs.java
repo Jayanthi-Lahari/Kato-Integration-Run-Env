@@ -17,7 +17,7 @@ public class MonitorLogs {
 		String fileName = e.getIn().getHeader("CamelFileName", String.class);
 		String folder = e.getIn().getHeader("CamelFileAbsolutePath", String.class);
 		String queueName = e.getIn().getHeader("CamelJMSDestinationProduced", String.class);
-		
+		 
 		 return new Document()
 	                .append("routeId", routeId)
 	                .append("exchangeId", exchangeId)
