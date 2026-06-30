@@ -25,8 +25,22 @@
             database: kaoto
             collection: Exceptions
             operation: insert
+- interceptSendToEndpoint:
+    id: interceptSendToEndpoint-3096
+    description: Capture All Target Endpoints
+    uri: "*"
+    steps:
+      - setProperty:
+          id: setProperty-3195
+          name: currentEndpoint
+          simple:
+            expression: ${header.CamelInterceptedEndpoint}
+      - bean:
+          id: capture-target-endpoint
+          ref: GlobalMnitor
+          method: captureSendToEndpoint
 - route:
-    id: Dynamic Document Approval Routing
+    id: intercept Dynamic Document Approval Routing
     from:
       id: document-routing-slip-route
       uri: activemq

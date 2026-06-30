@@ -21,6 +21,14 @@ public class EndpointCaptureNotifier extends EventNotifierSupport{
 		
 		String endpoint = sending.getEndpoint().getEndpointUri();
 		
+		 if (endpoint.startsWith("bean:")
+	                || endpoint.startsWith("log:")
+	                || endpoint.startsWith("mongodb")
+	                || endpoint.contains("collection=Audit")
+	                || endpoint.contains("Audit-Management")) {
+	            return;
+	        }
+		
 		List<String> endpoints = exchange.getProperty("targetEndpoints",List.class);
 		
 		if( endpoints == null ) {

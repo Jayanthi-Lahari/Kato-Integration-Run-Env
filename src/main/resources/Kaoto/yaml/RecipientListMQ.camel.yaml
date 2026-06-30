@@ -1,6 +1,6 @@
 - onException:
     id: global-exception
-    description: Enterprise Error Management System
+    description: Error Management System
     handled:
       constant: "true"
     exception:
@@ -37,12 +37,12 @@
             collection: Exceptions
             operation: insert
 - route:
-    id: order-route
+    id: order-recipientList-route
     description: Order Management System
     from:
       uri: activemq
       parameters:
-        destinationName: Confrimed_Order
+        destinationName: Confrimed_Order_IN
       steps:
         - setHeaders:
             id: order-audit-header
@@ -55,7 +55,7 @@
         - wireTap:
             id: order-audit
             description: Audit Management System
-            uri: direct:Aggregate-Audit
+            uri: direct:recipientList-Audit
         - recipientList:
             id: recipientList-6013
             constant:
@@ -69,7 +69,7 @@
         - wireTap:
             id: order-audit-3577
             description: Audit Management System
-            uri: direct:Aggregate-Audit
+            uri: direct:recipientList-Audit
       description: Confrimed_Order
 - route:
     id: audit-route
@@ -77,7 +77,7 @@
     from:
       uri: direct
       parameters:
-        name: Aggregate-Audit
+        name: recipientList-Audit
       steps:
         - bean:
             id: build-audit
@@ -94,9 +94,5 @@
               collection: Audit
               operation: insert
 - beans:
-    - name: OrderAggregationStrategy
-      type: com.bean.OrderAggregationStrategy
-    - name: AggregationValidationProcessor
-      type: com.process.AggregationValidationProcessor
     - name: GlobalMnitor
       type: com.common.GlobalMnitor

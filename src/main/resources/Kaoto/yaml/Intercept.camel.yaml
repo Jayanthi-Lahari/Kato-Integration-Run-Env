@@ -1,96 +1,85 @@
 - onException:
     id: global-exception
-    description: Error Management System
+    description: Handle processing exceptions
     handled:
       constant: "true"
     exception:
       - java.lang.Exception
     steps:
-      - setHeader:
-          id: set-audit-failed
-          description: Exception Audit Status
-          name: auditEvent
-          constant: FAILED
       - bean:
-          id: build-exception-audit
-          description: Exception Audit Builder
+          id: exception-handler
           ref: GlobalMnitor
           method: exceptionHandler
       - to:
-          id: save-exception
-          description: Exception Repository
+          id: exception-db
           uri: mongodb
           parameters:
             connectionBean: mongoBean
             database: kaoto
             collection: Exceptions
             operation: insert
-- interceptSendToEndpoint:
-    id: endpoint-interceptor
-    description: Capture All Target Endpoints
+
+- interceptFrom:
+    id: start-audit
+    description: Capture incoming request details
     uri: "activemq:*"
     steps:
       - bean:
-          id: capture-target-endpoint
-          ref: GlobalMnitor
-          method: captureEndpoint
+          id: start-audit-bean
+          ref: Intercept_Audit
+          method: captureStartAudit
+      - to:
+          id: audit-db
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            database: kaoto
+            collection: Audit
+            operation: insert
+
+- interceptSendToEndpoint:
+    id: endpoint-interceptor
+    description: Capture every outgoing endpoint
+    uri: "activemq:*"
+    steps:
+      - bean:
+          id: endpoint-monitor
+          ref: Intercept_Audit
+          method: captureSendToEndpoint
+
+- onCompletion:
+    id: completion-audit
+    onCompleteOnly: true
+    steps:
+      - bean:
+          ref: Monitor_Intercept
+          method: auditHandler
+      - to:
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            database: kaoto
+            collection: Audit
+            operation: insert
+
 - route:
-    id: Recipient-Order-List-Route
-    description: Order Management System
+    id: order-recipientList-Intercept-route
+    description: Process confirmed orders using Recipient List
     from:
       uri: activemq
       parameters:
-        destinationName: Confrimed_Order
+        destinationName: Confirmed_Order
       steps:
-        - setHeaders:
-            id: order-audit-header
-            description: Order Audit Metadata
-            headers:
-              - name: auditEvent
-                constant: ORDER_RECEIVED
-              - name: startTime
-                simple: ${date:now:yyyy-MM-dd HH:mm:ss}
-        - wireTap:
-            id: order-start-audit
-            description: Audit Management System
-            uri: direct:Aggregate-Audit
         - recipientList:
             id: distribute-order
-            description: Send Order To Multiple Business Systems
+            description: Send order to Billing, Inventory and Shipping
             constant:
               expression: activemq:Billing_Q,activemq:Inventory_Q,activemq:Shipping_Q
-        - setHeader:
-            id: success-status
-            description: Transaction Status
-            name: auditEvent
-            constant: SUCCESS
-        - wireTap:
-            id: order-success-audit
-            description: Audit Management System
-            uri: direct:Aggregate-Audit
-      description: Order
-- route:
-    id: audit-route
-    description: Audit Management System
-    from:
-      uri: direct
-      parameters:
-        name: Aggregate-Audit
-      steps:
-        - bean:
-            id: build-audit
-            description: Audit Document Generator
-            ref: GlobalMnitor
-            method: auditHandler
-        - to:
-            id: save-audit
-            description: Audit Repository
-            uri: mongodb
-            parameters:
-              connectionBean: mongoBean
-              database: kaoto
-              collection: Audit
-              operation: insert
+
 - beans:
+    - name: Intercept_Audit
+      type: com.common.Intercept_Audit
+    - name: Monitor_Intercept
+      type: com.common.Monitor_Intercept
     - name: GlobalMnitor
       type: com.common.GlobalMnitor

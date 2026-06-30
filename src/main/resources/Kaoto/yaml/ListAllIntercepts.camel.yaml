@@ -1,0 +1,66 @@
+- onException:
+    id: global-exception
+    handled:
+      constant: "true"
+    exception:
+      - java.lang.Exception
+    steps:
+      - log:
+          message: "ERROR :: ${exception.message}"
+      - to:
+          uri: activemq
+          parameters:
+            destinationName: ERROR.QUEUE
+
+- interceptFrom:
+    id: incoming-audit
+    uri: "*"
+    steps:
+      - log:
+          message: "Incoming message from ${fromEndpoint}"
+
+- intercept:
+    id: processing-audit
+    steps:
+      - log:
+          message: "Processing route ${routeId}"
+
+- interceptSendToEndpoint:
+    id: endpoint-audit
+    uri: "*"
+    steps:
+      - log:
+          message: "Sending to ${exchangeProperty.CamelToEndpoint}"
+
+- onCompletion:
+    id: completion-audit
+    steps:
+      - log:
+          message: "Route ${routeId} completed with Exchange ${exchangeId}"
+
+- route:
+    id: mq-to-mq-route
+    from:
+      uri: activemq
+      parameters:
+        destinationName: INPUT.QUEUE
+      steps:
+        - log:
+            message: "Received :: ${body}"
+
+        - setHeader:
+            name: processedBy
+            constant: Camel
+
+        - transform:
+            simple:
+              expression: |
+                {
+                  "status":"SUCCESS",
+                  "data":${body}
+                }
+
+        - to:
+            uri: activemq
+            parameters:
+              destinationName: OUTPUT.QUEUE

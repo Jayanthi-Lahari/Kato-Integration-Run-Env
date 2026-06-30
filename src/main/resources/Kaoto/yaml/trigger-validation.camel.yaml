@@ -1,0 +1,78 @@
+
+- onException:
+    id: global-exception
+    description: Handle processing exceptions
+    handled:
+      constant: "true"
+    exception:
+      - java.lang.Exception
+    steps:
+      - bean:
+          id: exception-handler
+          ref: GlobalMnitor
+          method: exceptionHandler
+      - to:
+          id: exception-db
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            database: kaoto
+            collection: Exceptions
+            operation: insert
+- route:
+    id: file-monitor-route
+    from:
+      id: file-scheduler
+      uri: timer
+      parameters:
+        period: "300000"
+        timerName: Scheduler
+      steps:
+        - setHeader:
+            id: set-input-directory
+            name: inputDir
+            constant:
+              expression: src/main/resources/input
+        - bean:
+            id: validate-trigger-files
+            description: Shipping_IN
+            ref: FileValidatorBean
+            method: scanAndValidate
+        - choice:
+            id: validate-file-list
+            when:
+              - id: valid-files-found
+                steps:
+                  - split:
+                      id: split-valid-files
+                      steps:
+                        - log:
+                            id: log-valid-file
+                            message: ${headers}   ---------------->   ${header.${body}}   ---------->   ${body}
+                        - to:
+                            id: move-to-staging
+                            uri: file
+                            parameters:
+                              directoryName: src/main/resources/output/staging
+                            description: Shipping_Out
+                            disabled: true
+                      simple:
+                        expression: ${body}
+                simple:
+                  expression: ${body.size()} > 0
+                description: CheckEmptyFiles
+            otherwise:
+              id: no-valid-trigger-files
+              steps:
+                - throwException:
+                    id: throw-trigger-file-not-found
+                    exceptionType: com.exception.TriggerFileNotFoundException
+                    description: NoTrgFileException
+                    message: '"No Trigger files for the poll'
+      description: File-Scheduler
+
+- beans:
+    - name: FileValidatorBean
+      type: com.bean.FileValidatorBean
+    - name: GlobalMnitor
+      type: com.common.GlobalMnitor

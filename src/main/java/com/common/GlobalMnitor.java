@@ -39,15 +39,18 @@ public class GlobalMnitor {
 //        String targetEndpoint =
 //                e.getIn().getHeader("targetEndpoint",
 //                        String.class);
-        Object targetEndpoint = e.getProperty("targetEndpoints");
-
-        if (targetEndpoint == null) {
-            targetEndpoint = e.getProperty(Exchange.TO_ENDPOINT);
-        }
-
-        if (targetEndpoint == null) {
-            targetEndpoint = e.getIn().getHeader("targetEndpoint");
-        }
+//        Object targetEndpoint = e.getProperty("targetEndpoints");
+//
+//        if (targetEndpoint == null) {
+//            targetEndpoint = e.getProperty(Exchange.TO_ENDPOINT);
+//        }
+//
+//        if (targetEndpoint == null) {
+//            targetEndpoint = e.getIn().getHeader("targetEndpoint");
+//        }
+        
+        List<String> targetEndpoint =
+                e.getProperty("targetEndpoints", List.class);
         
 
         String payload =
@@ -200,12 +203,16 @@ public class GlobalMnitor {
             return;
         }
         
-        if (endpoint.startsWith("direct://Aggregate-Audit")
-                || endpoint.startsWith("mongodb:")
-                || endpoint.startsWith("bean:")
-                || endpoint.startsWith("log:")) {
+        
+        if (endpoint.startsWith("bean:")
+                || endpoint.startsWith("log:")
+                || endpoint.startsWith("mongodb")
+                || endpoint.contains("collection=Audit")
+                || endpoint.contains("Aggregate-Audit")
+                || endpoint.contains("Audit-Management")) {
             return;
         }
+
         
         // Get existing endpoint list
         List<String> targetEndpoints =
@@ -223,6 +230,41 @@ public class GlobalMnitor {
         }
     }
 
+    
+    @SuppressWarnings("unchecked")
+    public void captureSendToEndpoint(Exchange exchange) {
+
+        // Endpoint that Camel is about to send to
+        String endpoint = exchange.getProperty("currentEndpoint", String.class);
+
+        if (endpoint == null) {
+            return;
+        }
+
+        if (endpoint.startsWith("bean:")
+                || endpoint.startsWith("log:")
+                || endpoint.startsWith("mongodb")
+                || endpoint.contains("collection=Audit")
+                || endpoint.contains("Audit-Management")) {
+            return;
+        }
+
+        // Get existing endpoint list
+        List<String> targetEndpoints =
+                exchange.getProperty("targetEndpoints", List.class);
+
+        // Create list if it doesn't exist
+        if (targetEndpoints == null) {
+            targetEndpoints = new ArrayList<>();
+            exchange.setProperty("targetEndpoints", targetEndpoints);
+        }
+
+        // Avoid duplicates
+        if (!targetEndpoints.contains(endpoint)) {
+            targetEndpoints.add(endpoint);
+        }
+    }
+    
     /*
      * =========================================================
      * FILE CONTEXT
