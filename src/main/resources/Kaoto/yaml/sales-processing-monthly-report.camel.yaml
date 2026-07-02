@@ -6,17 +6,14 @@
     exception:
       - java.lang.Exception
     steps:
-      - log:
-          id: log-4346
-          message: ${headers} ----------- ${body}
       - bean:
           id: build-queue-exception
-          description: Build failure audit document from ActiveMQ queue message
+          description: Error Document
           method: exceptionHandler
           ref: GlobalMnitor
       - to:
           id: save-queue-exception-db
-          description: Store queue processing exception in MongoDB Exceptions collection
+          description: Exceptions DB
           uri: mongodb
           parameters:
             connectionBean: mongoBean
@@ -27,11 +24,11 @@
     id: sales-queue-to-file-route
     description: Consume sales messages from ActiveMQ queue and generate monthly CSV file
     from:
-      id: sales-queue-consumer
-      description: ActiveMQ Sales-System queue consumer (source system)
+      id: sales-Report-Genrator
+      description: Sales-System_IN
       uri: activemq
       parameters:
-        destinationName: Sales-System
+        destinationName: Sales-System-In
       steps:
         - setHeaders:
             id: audit-header
@@ -48,20 +45,20 @@
                   expression: ${date:now:yyyy-MM-dd HH:mm:ss}
         - wireTap:
             id: tap-start-audit
-            description: Send START audit event to central audit route
+            description: Audit
             uri: direct:Sales-Audit
         - unmarshal:
             id: xml-to-object
             jacksonXml: {}
-            description: " Convert ActiveMQ XML message to Java object"
+            description: XML-Java-Conversion
         - setBody:
             id: convert-to-csv
-            description: Transform queue message into CSV format
+            description: CSV Tranform
             simple:
               expression: ${body[saleId]}|${body[orderNumber]}|${body[customerNumber]}|${body[customerName]}|${body[saleDate]}|${body[amount]}|${body[currency]}\n
         - to:
             id: write-monthly-file
-            description: Write transformed message into monthly CSV file
+            description: Sales-Report-Out
             uri: file
             parameters:
               directoryName: src/main/resources/output/Monthly-Sales-Report
@@ -78,26 +75,23 @@
                 simple:
                   expression: ${header.CamelFileNameProduced}
             description: Success Event
-        - log:
-            id: log-1917
-            message: ${headers}
         - wireTap:
             id: tap-success-audit
-            description: Send SUCCESS audit event to audit route
+            description: Audit
             uri: direct:Sales-Audit
 - route:
     id: audit-processing-route
     description: Central audit processor for queue-to-file integration flow
     from:
       id: audit-consumer
-      description: Receive audit events from queue processing route
+      description: Audit
       uri: direct
       parameters:
         name: Sales-Audit
       steps:
         - bean:
             id: build-audit-document
-            description: Build unified audit document from queue processing flow
+            description: Audit document
             method: auditHandler
             ref: GlobalMnitor
         - to:

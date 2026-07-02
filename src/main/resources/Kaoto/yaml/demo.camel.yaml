@@ -1,0 +1,23 @@
+- onException:
+    id: onException-1033
+- route:
+    id: route-1736
+    from:
+      id: from-1341
+      uri: file
+      parameters:
+        directoryName: src/main/resources/input/Bank
+        scheduler.cron: 0 0/30 * * * ?
+      steps:
+        - aggregate:
+            id: Merage-single-poll-files
+            correlationExpression:
+              constant:
+                expression: BANK_BATCH
+            aggregationStrategy: "#FileMergeStrategy"
+            completionPredicate:
+              simple:
+                expression: ${header.CamelBatchComplete}
+- beans:
+    - name: FileMergeStrategy
+      type: org.apache.camel.AggregationStrategy

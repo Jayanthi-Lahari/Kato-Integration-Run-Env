@@ -1,0 +1,12 @@
+{
+  "orderId": "ORD1004",
+  "customerId": "CUST504",
+  "customerName": "Priya Reddy",
+  "email": "priya.reddy@example.com",
+  "product": "Printer",
+  "quantity": 2,
+  "unitPrice": 15000,
+  "totalAmount": 30000,
+  "orderDate": "2026-06-30",
+  "paymentStatus": "PAID"
+}

@@ -1,0 +1,100 @@
+- onException:
+    id: global-exception
+    description: Handle processing exceptions
+    handled:
+      constant: "true"
+    exception:
+      - java.lang.Exception
+    steps:
+      - bean:
+          id: exception-handler
+          ref: Monitor_Intercept
+          method: exceptionHandler
+      - to:
+          id: exception-db
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            database: kaoto
+            collection: Exceptions
+            operation: insert
+
+- interceptFrom:
+    id: capture-start-audit
+    uri: "activemq:*"
+    description: Capture incoming request
+    steps:
+      - bean:
+          id: start-audit
+          ref: Intercept_Audit
+          method: captureStartAudit
+
+- interceptSendToEndpoint:
+    id: capture-target-endpoints
+    uri: "activemq:*"
+    description: Capture outgoing endpoints
+    steps:
+      - bean:
+          id: endpoint-audit
+          ref: Intercept_Audit
+          method: captureSendToEndpoint
+
+- onCompletion:
+    id: completion-audit
+    onCompleteOnly: true
+    steps:
+      - bean:
+          id: success-audit
+          ref: Monitor_Intercept
+          method: auditHandler
+      - to:
+          id: audit-db
+          uri: mongodb
+          parameters:
+            connectionBean: mongoBean
+            database: kaoto
+            collection: Audit
+            operation: insert
+
+- route:
+    id: multicast-route
+    description: Distribute message to multiple ActiveMQ queues
+
+    from:
+      id: from-confirmed-order
+      uri: activemq
+      parameters:
+        destinationName: Confirmed_Order
+
+      steps:
+        - multicast:
+            id: distribute-message
+
+            steps:
+              - to:
+                  id: billing-queue
+                  uri: activemq
+                  parameters:
+                    destinationName: Billing_Q
+
+              - to:
+                  id: inventory-queue
+                  uri: activemq
+                  parameters:
+                    destinationName: Inventory_Q
+
+              - to:
+                  id: shipping-queue
+                  uri: activemq
+                  parameters:
+                    destinationName: Shipping_Q
+
+- beans:
+    - name: Intercept_Audit
+      type: com.common.Intercept_Audit
+
+    - name: Monitor_Intercept
+      type: com.common.Monitor_Intercept
+
+    - name: GlobalMnitor
+      type: com.common.GlobalMnitor

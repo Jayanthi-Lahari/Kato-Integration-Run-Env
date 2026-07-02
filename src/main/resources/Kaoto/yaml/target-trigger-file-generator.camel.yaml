@@ -1,0 +1,21 @@
+- route:
+    id: bank-trigger-file-transfer-route
+    description: Bank Trigger File Transfer System
+    from:
+      id: bank-source-file-consumer
+      uri: file
+      parameters:
+        directoryName: src/main/resources/input/Bank
+        doneFileName: ${file:name.noext}.trg
+        moveFailed: src/main/resources/input/Bank/Failed
+        includeExt: txt
+        move: src/main/resources/input/Bank/success
+      steps:
+        - to:
+            id: bank-target-file-producer
+            description: Bank_Out
+            uri: file
+            parameters:
+              directoryName: src/main/resources/output/Bank
+              doneFileName: ${file:name.noext}.trg
+      description: Bank_IN

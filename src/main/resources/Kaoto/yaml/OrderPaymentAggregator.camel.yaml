@@ -37,7 +37,7 @@
             collection: Exceptions
             operation: insert
 - route:
-    id: order-route
+    id: Aggregation-Order-Confirmation-Route
     description: Order Management System
     from:
       uri: activemq

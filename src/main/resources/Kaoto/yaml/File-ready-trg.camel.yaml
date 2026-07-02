@@ -1,0 +1,20 @@
+- route:
+    id: route-3744
+    from:
+      id: to-1354
+      uri: file
+      parameters:
+        directoryName: src/main/resources/input/Bank
+        fileName: ${file:name.noext}.txt.ready
+      steps:
+        - to:
+            id: File-Basic-ready-Trigger
+            uri: file
+            parameters:
+              directoryName: src/main/resources/output/Bank
+              doneFileName: ${file:name.noext}.trg
+              fileName: ${file:name.noext}.txt
+            description: |
+              Target
+      description: |
+        Source

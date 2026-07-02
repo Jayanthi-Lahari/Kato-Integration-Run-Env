@@ -1,0 +1,12 @@
+<Order>
+    <orderId>ORD1001</orderId>
+    <customerId>CUST101</customerId>
+    <customerName>John Smith</customerName>
+    <productId>PRD501</productId>
+    <productName>Laptop</productName>
+    <quantity>2</quantity>
+    <unitPrice>65000.00</unitPrice>
+    <totalAmount>130000.00</totalAmount>
+    <orderDate>2026-07-01</orderDate>
+    <status>CONFIRMED</status>
+</Order>

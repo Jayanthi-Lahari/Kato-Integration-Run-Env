@@ -9,7 +9,7 @@
       - bean:
           id: bean-exception-monitor
           method: exceptions
-          description: Error Body
+          description: Error Bean
           ref: MonitorLogs
       - to:
           id: mongodb-exception-insert
@@ -21,10 +21,10 @@
             operation: insert
           description: Store Exception
 - route:
-    id: Trigger-Based-File-Transfer-Route
+    id: Trigger-based-xml-csv-file-to-Delivery-route
     description: Process XML and CSV files only when corresponding trigger file exists
     from:
-      id: file-monitor-endpoint
+      id: trigger-based-xml-csv-file-to-activemq-route
       uri: file
       parameters:
         directoryName: src/main/resources/input
@@ -38,23 +38,23 @@
             name: startTime
             simple:
               expression: ${date:now:yyyy-MM-dd HH:mm:ss}
-            description: Start Monitor
+            description: MetaData
         - validate:
             id: validate-5782
             simple:
-              expression: ${CamelFileLength} > 0
+              expression: " ${header.CamelFileLength} > 0"
             description: EmptyFileCheck
         - to:
             id: activemq-file-delivery
             uri: activemq
             parameters:
               destinationName: DeliveryProcessingSystem
-            description: Deliver
+            description: Deliver_OUT
         - wireTap:
             id: wiretap-audit-route
             description: Audit
             uri: direct:delivery-Audit
-      description: Order
+      description: Order_IN
 - route:
     id: File-Processing-Audit-Route
     description: Store successful file processing audit records
@@ -66,7 +66,7 @@
       steps:
         - bean:
             id: bean-audit-monitor
-            description: Audit Body
+            description: Audit Bean
             method: audit
             ref: MonitorLogs
         - to:
@@ -80,6 +80,7 @@
               username: admin
               password: admin
             description: Store Audit
+      description: Audit
 - beans:
     - name: MonitorLogs
       type: com.common.MonitorLogs

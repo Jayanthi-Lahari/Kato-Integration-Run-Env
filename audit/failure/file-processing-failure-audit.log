@@ -28,4 +28,179 @@ STATUS : FAILED
 ROUTE  : order-file-monitor-route
 ERROR  : No File Found in Source Endpoint
 TIME   : 2026-06-23 17:22:54
+        =========================================={
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "633917F08F86EFD-0000000000000000",
+  "startTime": "2026-07-01 11:23:29",
+  "endTime": "2026-07-01 11:23:29",
+  "sourceEndpoint": "",
+  "failureEndpoint": "file://src/main/resources/input/orders?include=order.*%5C.json&noop=false",
+  "status": "FAILED",
+  "exceptionName": "RuntimeException",
+  "errorMessage": "No File Found in Source Endpoint"
+}{
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "BB51523E3371444-0000000000000000",
+  "startTime": "2026-07-01 11:57:20",
+  "endTime": "2026-07-01 11:57:20",
+  "sourceEndpoint": "",
+  "failureEndpoint": "file://src/main/resources/input/orders?include=order.*%5C.json&noop=false",
+  "status": "FAILED",
+  "exceptionName": "RuntimeException",
+  "errorMessage": "No File Found in Source Endpoint"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "BB51523E3371444-0000000000000002",
+  "startTime": "2026-07-01 12:02:20",
+  "endTime": "2026-07-01 12:02:20",
+  "sourceEndpoint": "",
+  "failureEndpoint": "file://src/main/resources/input/orders?include=order.*%5C.json&noop=false",
+  "status": "FAILED",
+  "exceptionName": "RuntimeException",
+  "errorMessage": "No File Found in Source Endpoint"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "31F3C9B0B2E3220-0000000000000000",
+  "startTime": "2026-07-01 12:07:05",
+  "endTime": "2026-07-01 12:07:05",
+  "sourceEndpoint": "",
+  "failureEndpoint": "file://src/main/resources/input/orders?include=order.*%5C.json&noop=false",
+  "status": "FAILED",
+  "exceptionName": "RuntimeException",
+  "errorMessage": "No File Found in Source Endpoint"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "89CD269E64D2C80-0000000000000000",
+  "startTime": "2026-07-01 12:19:55",
+  "endTime": "2026-07-01 12:19:55",
+  "sourceEndpoint": "",
+  "failureEndpoint": "file://src/main/resources/input/orders?include=order.*%5C.json&noop=false",
+  "status": "FAILED",
+  "exceptionName": "RuntimeException",
+  "errorMessage": "No File Found in Source Endpoint"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "89CD269E64D2C80-0000000000000004",
+  "startTime": "2026-07-01 12:29:55",
+  "endTime": "2026-07-01 12:29:55",
+  "sourceEndpoint": "",
+  "failureEndpoint": "file://src/main/resources/input/orders?include=order.*%5C.json&noop=false",
+  "status": "FAILED",
+  "exceptionName": "RuntimeException",
+  "errorMessage": "No File Found in Source Endpoint"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "89CD269E64D2C80-0000000000000006",
+  "startTime": "2026-07-01 12:34:55",
+  "endTime": "2026-07-01 12:34:55",
+  "sourceEndpoint": "",
+  "failureEndpoint": "file://src/main/resources/input/orders?include=order.*%5C.json&noop=false",
+  "status": "FAILED",
+  "exceptionName": "RuntimeException",
+  "errorMessage": "No File Found in Source Endpoint"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "1E93F872DD8081B-0000000000000000",
+  "startTime": "2026-07-01 12:38:03",
+  "endTime": "2026-07-01 12:38:03",
+  "sourceEndpoint": "file://src/main/resources/input/orders?include=order.*%5C.json&noop=false",
+  "failureEndpoint": "file://src/main/resources/input/orders?include=order.*%5C.json&noop=false",
+  "status": "FAILED",
+  "exceptionName": "RuntimeException",
+  "errorMessage": "No File Found in Source Endpoint"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "E496AA0AB99873E-0000000000000000",
+  "startTime": "2026-07-01 12:54:12",
+  "endTime": "2026-07-01 12:54:12",
+  "sourceEndpoint": "file://src/main/resources/input/orders?include=go.*%5C.json&noop=true",
+  "failureEndpoint": "file://src/main/resources/input/orders?include=go.*%5C.json&noop=true",
+  "status": "FAILED",
+  "exceptionName": "RuntimeException",
+  "errorMessage": "No File Found in Source Endpoint"
+}{
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "E1032AE95F9CA91-0000000000000000",
+  "startTime": "2026-07-01 12:57:57",
+  "endTime": "2026-07-01 12:57:57",
+  "sourceEndpoint": "file://src/main/resources/input/orders?include=go.*%5C.json&noop=true",
+  "failureEndpoint": "file://src/main/resources/input/orders?include=go.*%5C.json&noop=true",
+  "status": "FAILED",
+  "exceptionName": "RuntimeException",
+  "errorMessage": "No File Found in Source Endpoint"
+}{
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "2CD5A9F65A8E1D3-0000000000000000",
+  "startTime": "2026-07-01 13:00:48",
+  "endTime": "2026-07-01 13:00:48",
+  "sourceEndpoint": "file://src/main/resources/input/orders?include=go.*%5C.json&noop=true",
+  "failureEndpoint": "file://src/main/resources/input/orders?include=go.*%5C.json&noop=true",
+  "status": "FAILED",
+  "exceptionName": "RuntimeException",
+  "errorMessage": "No File Found in Source Endpoint"
+}==========================================
+STATUS : FAILED
+ROUTE  : order-file-monitor-route
+ERROR  : No File Found in Source Endpoint
+TIME   : 2026-07-01 16:15:16
+        ====================================================================================
+STATUS : FAILED
+ROUTE  : order-file-monitor-route
+ERROR  : No File Found in Source Endpoint
+TIME   : 2026-07-01 16:25:16
+        ====================================================================================
+STATUS : FAILED
+ROUTE  : order-file-monitor-route
+ERROR  : No File Found in Source Endpoint
+TIME   : 2026-07-01 16:30:16
+        ====================================================================================
+STATUS : FAILED
+ROUTE  : order-file-monitor-route
+ERROR  : No File Found in Source Endpoint
+TIME   : 2026-07-01 16:35:16
+        ====================================================================================
+STATUS : FAILED
+ROUTE  : order-file-monitor-route
+ERROR  : No File Found in Source Endpoint
+TIME   : 2026-07-01 16:40:16
+        ====================================================================================
+STATUS : FAILED
+ROUTE  : order-file-monitor-route
+ERROR  : No File Found in Source Endpoint
+TIME   : 2026-07-01 16:45:16
+        ====================================================================================
+STATUS : FAILED
+ROUTE  : order-file-monitor-route
+ERROR  : No File Found in Source Endpoint
+TIME   : 2026-07-01 16:50:16
+        ====================================================================================
+STATUS : FAILED
+ROUTE  : order-file-monitor-route
+ERROR  : No File Found in Source Endpoint
+TIME   : 2026-07-01 16:55:16
+        ====================================================================================
+STATUS : FAILED
+ROUTE  : order-file-monitor-route
+ERROR  : No File Found in Source Endpoint
+TIME   : 2026-07-01 17:00:16
+        ====================================================================================
+STATUS : FAILED
+ROUTE  : order-file-monitor-route
+ERROR  : No File Found in Source Endpoint
+TIME   : 2026-07-01 17:05:16
+        ====================================================================================
+STATUS : FAILED
+ROUTE  : order-file-monitor-route
+ERROR  : No File Found in Source Endpoint
+TIME   : 2026-07-01 17:10:16
+        ====================================================================================
+STATUS : FAILED
+ROUTE  : order-file-monitor-route
+ERROR  : No File Found in Source Endpoint
+TIME   : 2026-07-01 17:15:16
+        ====================================================================================
+STATUS : FAILED
+ROUTE  : order-file-monitor-route
+ERROR  : No File Found in Source Endpoint
+TIME   : 2026-07-01 17:20:16
         ==========================================

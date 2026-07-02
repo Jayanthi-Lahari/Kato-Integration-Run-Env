@@ -1,0 +1,9 @@
+<Sale>
+    <saleId>S1001</saleId>
+    <orderNumber>ORD-20260701-001</orderNumber>
+    <customerNumber>CUST1001</customerNumber>
+    <customerName>John Smith</customerName>
+    <saleDate>2026-07-01</saleDate>
+    <amount>1250.50</amount>
+    <currency>USD</currency>
+</Sale>

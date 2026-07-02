@@ -1,0 +1,12 @@
+{
+  "orderId": "ORD1002",
+  "customerId": "CUST502",
+  "customerName": "Alice Johnson",
+  "email": "alice.johnson@example.com",
+  "product": "Mobile Phone",
+  "quantity": 1,
+  "unitPrice": 42000,
+  "totalAmount": 42000,
+  "orderDate": "2026-06-29",
+  "paymentStatus": "PAID"
+}

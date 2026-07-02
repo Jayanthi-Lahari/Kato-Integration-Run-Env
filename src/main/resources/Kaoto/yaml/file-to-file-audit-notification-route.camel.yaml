@@ -1,66 +1,69 @@
 - onException:
-    id: Exception-route
-    description: Global Exception Handling Route
+    id: global-exception-handler
+    description: Exception handler
     steps:
       - setHeaders:
-          id: Headers-exception
-          description: Capture Failure Timestamp
+          id: exception-metadata
+          description: metadata
           headers:
             - name: failedTime
               simple:
-                expression: ${date:now:yyyy-MM-dd HH:mm:ss}
+                expression: ${date:now:yyyy-MM-dd HH:mm:ssSS}
       - choice:
-          id: choice-3335
-          description: Format Error Message Based on Exception Type
+          id: exception-choice
+          description: Target Path Check
           when:
-            - id: when-9703
+            - id: directory-validation
               simple:
                 expression: ${exception.message} contains 'Cannot store file'
               steps:
                 - setHeader:
-                    id: setHeader-1881
-                    description: Set Directory Not Found Error Message
+                    id: directory-error
+                    description: Error Text
                     name: errorMessage
                     simple:
                       expression: Target directory path does not exist and
                         ${exception.message.replaceAll('\\','/')}
           otherwise:
-            id: otherwise-1440
+            id: exception-default
             steps:
               - setHeader:
-                  id: setHeader-3024
-                  description: Set Original Exception Message
+                  id: exception-message
+                  description: Exception
                   name: errorMessage
                   simple:
                     expression: ${exception.message}
-      - to:
-          id: notification
-          description: Send Failure Email Notification
-          uri: bean
-          parameters:
-            beanName: mailNotificationBean
-            method: failureNotification('{{alert.to.email}}')
       - setBody:
-          description: Build Exception Audit Document
+          description: Exception Details
           simple:
-            expression: |-
+            expression: >-
               {
                 "routeId": "${routeId}",
                 "exchangeId": "${exchangeId}",
                 "startTime": "${header.startTime}",
                 "endTime": "${date:now:yyyy-MM-dd HH:mm:ss}",
+                "sourceEndpoint": "${header.CamelFileParent.replaceAll('\\','/')}",
+                "failureEndpoint": "${exchangeProperty.CamelFailureEndpoint}",
                 "fileName": "${header.CamelFileName}",
-                "folder" : "${header.errorMessage}",
                 "status": "FAILED",
+                "exceptionName": "${exception.class.simpleName}",
                 "errorMessage": "${header.errorMessage}"
               }
+      - to:
+          id: failure-notification
+          description: Notification
+          uri: bean
+          parameters:
+            beanName: notificationBean
+            method: failureNotification
+          disabled: false
       - convertBodyTo:
-          id: convertBodyTo-2702
-          description: Convert Exception Payload to MongoDB Document
+          id: exception-document
+          description: Document Format
           type: org.bson.Document
       - to:
-          id: to-2262
-          description: Store Exception Details in MongoDB
+          id: exception-mongodb
+          description: Exception Store
           uri: mongodb
           parameters:
             connectionBean: mongoBean
@@ -72,13 +75,12 @@
     exception:
       - java.lang.Exception
       - java.io.FileNotFoundException
-
 - route:
-    id: file-to-file-notification
-    description: Process Order Files and Trigger Audit Logging
+    id: file-processing-route
+    description: Order Management
     from:
-      id: start
-      description: Read Order Files from Input Directory
+      id: file-consumer
+      description: Order IN
       uri: file
       parameters:
         directoryName: src/main/resources/input/orders
@@ -88,8 +90,8 @@
         move: success/${file:name}
       steps:
         - setHeaders:
-            id: setHeaders-3455
-            description: Capture File Processing Metadata
+            id: audit-metadata
+            description: metadata
             headers:
               - name: exchangeId
                 simple:
@@ -99,49 +101,56 @@
                   expression: ${routeId}
               - name: startTime
                 simple:
-                  expression: ${date:now:yyyy-MM-dd HH:mm:ss}
+                  expression: ${date:now:yyyy-MM-dd HH:mm:ssSS}
         - to:
-            id: to-2676
-            description: Write File to Target Output Directory
+            id: output-directory
+            description: Order OUT
             uri: file
             parameters:
-              directoryName: src/main/resources/output/test
+              directoryName: src/main/resources/output/sample
               autoCreate: false
+        - setHeader:
+            id: Target Endpoint
+            description: Target Endpoint
+            name: targetEndpoint
+            simple:
+              expression: ${exchangeProperty.CamelToEndpoint}
         - wireTap:
-            id: wireTap-2265
-            description: Trigger Audit Logging Route
+            id: audit-wiretap
+            description: Audit
             uri: direct:audit-route
-
 - route:
-    id: audit-route
-    description: Store Successful File Processing Audit Records
+    id: audit-processing-route
+    description: Audit Management
     from:
-      id: audit-start
-      description: Receive Audit Event from Main Route
+      id: audit-consumer
+      description: Audit
       uri: direct
       parameters:
         name: audit-route
       steps:
         - setBody:
-            description: Build Success Audit Document
+            description: Audit Details
             simple:
-              expression: |-
+              expression: >-
                 {
                   "routeId": "${routeId}",
                   "exchangeId": "${exchangeId}",
                   "startTime": "${header.startTime}",
                   "endTime": "${date:now:yyyy-MM-dd HH:mm:ss}",
+                  "sourceEndpoint": "${header.CamelFileParent.replaceAll('\\','/')}",
+                  "targetEndpoint": "${header.targetEndpoint}",
                   "fileName": "${header.CamelFileName}",
                   "Folder": "${header.CamelFileNameProduced.replaceAll('\\','/')}",
                   "status": "SUCCESS"
                 }
         - convertBodyTo:
-            id: convertBodyTo-1825
-            description: Convert Audit Payload to MongoDB Document
+            id: audit-document
+            description: Document Format
             type: org.bson.Document
         - to:
-            id: audit-db
-            description: Store Success Audit Record in MongoDB
+            id: audit-mongodb
+            description: Audit Stores
             uri: mongodb
             parameters:
               database: kaoto

@@ -1,1 +1,142 @@
-[SUCCESS] File=order1001.json, Route=order-file-monitor-route, Time=2026-06-18 14:08:43
+[SUCCESS] File=order1001.json, Route=order-file-monitor-route, Time=2026-06-18 14:08:43{
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "633917F08F86EFD-0000000000000001",
+  "startTime": "2026-07-01 11:23:29",
+  "endTime": "2026-07-01 11:23:33",
+  "sourceEndpoint": "",
+  "targetEndpoint": "file://audit/failure?fileExist=Append&fileName=file-processing-failure-audit.log",
+  "status": "SUCCESS"
+}{
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "BB51523E3371444-0000000000000001",
+  "startTime": "2026-07-01 11:57:20",
+  "endTime": "2026-07-01 11:57:25",
+  "sourceEndpoint": "",
+  "targetEndpoint": "file://audit/failure?fileExist=Append&fileName=file-processing-failure-audit.log",
+  "status": "SUCCESS"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "BB51523E3371444-0000000000000003",
+  "startTime": "2026-07-01 12:02:20",
+  "endTime": "2026-07-01 12:02:24",
+  "sourceEndpoint": "",
+  "targetEndpoint": "file://audit/failure?fileExist=Append&fileName=file-processing-failure-audit.log",
+  "status": "SUCCESS"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "31F3C9B0B2E3220-0000000000000001",
+  "startTime": "2026-07-01 12:07:05",
+  "endTime": "2026-07-01 12:07:09",
+  "sourceEndpoint": "",
+  "targetEndpoint": "file://audit/failure?fileExist=Append&fileName=file-processing-failure-audit.log",
+  "status": "SUCCESS"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "8842302A436934A-0000000000000001",
+  "startTime": "2026-07-01 12:08:10",
+  "endTime": "2026-07-01 12:08:10",
+  "sourceEndpoint": "src/main/resources/input/orders",
+  "targetEndpoint": "activemq://order_Stored_OUT",
+  "status": "SUCCESS"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "89CD269E64D2C80-0000000000000001",
+  "startTime": "2026-07-01 12:19:55",
+  "endTime": "2026-07-01 12:19:59",
+  "sourceEndpoint": "",
+  "targetEndpoint": "file://audit/failure?fileExist=Append&fileName=file-processing-failure-audit.log",
+  "status": "SUCCESS"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "89CD269E64D2C80-0000000000000003",
+  "startTime": "2026-07-01 12:24:54",
+  "endTime": "2026-07-01 12:24:54",
+  "sourceEndpoint": "src/main/resources/input/orders",
+  "targetEndpoint": "activemq://order_Stored_OUT",
+  "status": "SUCCESS"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "89CD269E64D2C80-0000000000000005",
+  "startTime": "2026-07-01 12:29:55",
+  "endTime": "2026-07-01 12:29:59",
+  "sourceEndpoint": "",
+  "targetEndpoint": "file://audit/failure?fileExist=Append&fileName=file-processing-failure-audit.log",
+  "status": "SUCCESS"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "89CD269E64D2C80-0000000000000007",
+  "startTime": "2026-07-01 12:34:55",
+  "endTime": "2026-07-01 12:34:59",
+  "sourceEndpoint": "",
+  "targetEndpoint": "file://audit/failure?fileExist=Append&fileName=file-processing-failure-audit.log",
+  "status": "SUCCESS"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "1E93F872DD8081B-0000000000000001",
+  "startTime": "2026-07-01 12:38:03",
+  "endTime": "2026-07-01 12:38:06",
+  "sourceEndpoint": "",
+  "targetEndpoint": "file://audit/failure?fileExist=Append&fileName=file-processing-failure-audit.log",
+  "status": "SUCCESS"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "6A5704BA8C6A188-0000000000000001",
+  "startTime": "2026-07-01 12:38:54",
+  "endTime": "2026-07-01 12:38:54",
+  "sourceEndpoint": "",
+  "targetEndpoint": "activemq://order_Stored_OUT",
+  "status": "SUCCESS"
+} {
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "332D108F81C0098-0000000000000001",
+  "startTime": "2026-07-01 12:46:39",
+  "endTime": "2026-07-01 12:46:39",
+  "sourceEndpoint": "",
+  "targetEndpoint": "activemq://order_Stored_OUT",
+  "status": "SUCCESS"
+}{
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "439A5600003A0EB-0000000000000001",
+  "startTime": "2026-07-01 12:51:36",
+  "endTime": "2026-07-01 12:51:36",
+  "sourceEndpoint": "",
+  "targetEndpoint": "activemq://order_Stored_OUT",
+  "status": "SUCCESS"
+}{
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "9C425B61D2B35D2-0000000000000001",
+  "startTime": "2026-07-01 12:52:06",
+  "endTime": "2026-07-01 12:52:06",
+  "sourceEndpoint": "src/main/resources/input/orders",
+  "targetEndpoint": "activemq://order_Stored_OUT",
+  "status": "SUCCESS"
+}{
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "E496AA0AB99873E-0000000000000001",
+  "startTime": "2026-07-01 12:54:12",
+  "endTime": "2026-07-01 12:54:15",
+  "sourceEndpoint": "",
+  "targetEndpoint": "file://audit/failure?fileExist=Append&fileName=file-processing-failure-audit.log",
+  "status": "SUCCESS"
+}{
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "E1032AE95F9CA91-0000000000000001",
+  "startTime": "2026-07-01 12:57:57",
+  "endTime": "2026-07-01 12:57:57",
+  "sourceEndpoint": "",
+  "targetEndpoint": "file://audit/failure?fileExist=Append&fileName=file-processing-failure-audit.log",
+  "status": "SUCCESS"
+}{
+  "routeId": "order-file-monitor-route",
+  "exchangeId": "2CD5A9F65A8E1D3-0000000000000001",
+  "startTime": "2026-07-01 13:00:48",
+  "endTime": "2026-07-01 13:00:48",
+  "sourceEndpoint": "",
+  "targetEndpoint": "file://audit/failure?fileExist=Append&fileName=file-processing-failure-audit.log",
+  "status": "SUCCESS"
+}==========================================
+ STATUS : SUCCESS
+FILE   : order-demo.json
+ROUTE  : order-file-monitor-route
+TIME   : 2026-07-01 16:20:16
+        ==========================================

@@ -1,0 +1,20 @@
+- route:
+    id: route-2217
+    from:
+      id: from-1293
+      uri: timer
+      parameters:
+        period: "1000"
+        timerName: template
+      steps:
+        - to:
+            id: Scheduler-MergeFile
+            uri: file
+            parameters:
+              directoryName: src/main/resources/input/Bank
+              checksumWriteFile: false
+            description: Source
+        - to:
+            id: to-2808
+            uri: file
+            parameters: {}

@@ -1,0 +1,115 @@
+- onException:
+    id: file-processing-exception
+    description: Handle File Processing Failures and Send Notifications
+    exception:
+      - java.lang.Exception
+    handled:
+      constant: "true"
+    steps:
+      - setHeader:
+          name: errorMessage
+          simple:
+            expression: ${exception.message}
+          description: Error MetaData
+          disabled: false
+      - setBody:
+          description: Exception Details
+          simple:
+            expression: |
+              
+              {
+                "routeId": "${routeId}",
+                "exchangeId": "${exchangeId}",
+                "startTime": "${header.startTime}",
+                "endTime": "${date:now:yyyy-MM-dd HH:mm:ss}",
+                "sourceEndpoint": "${exchangeProperty.CamelFailureEndpoint}",
+                "failureEndpoint": "${exchangeProperty.CamelFailureEndpoint}",
+                "status": "FAILED",
+                "exceptionName": "${exception.class.simpleName}",
+                "errorMessage": "${exception.message}"
+              } 
+      - bean:
+          description: Email Notification
+          ref: notificationBean
+          method: failureNotification
+          disabled: false
+      - to:
+          description: Exception Record
+          uri: file
+          parameters:
+            directoryName: audit/failure
+            fileName: file-processing-failure-audit.log
+            fileExist: Append
+- onCompletion:
+    id: file-processing-completion
+    description: Store Success Audit
+    onCompleteOnly: true
+    steps:
+      - setBody:
+          description: Audit Details
+          simple:
+            expression: >
+              
+              {
+                "routeId": "${routeId}",
+                "exchangeId": "${exchangeId}",
+                "startTime": "${header.startTime}",
+                "endTime": "${date:now:yyyy-MM-dd HH:mm:ss}",
+                "sourceEndpoint": "${header.CamelFilePath.replaceAll('\\','/')}",
+                "targetEndpoint": "${exchangeProperty.CamelToEndpoint}",
+                "status": "SUCCESS"
+              } 
+      - to:
+          description: Audit Record
+          uri: file
+          parameters:
+            directoryName: audit/success
+            fileName: file-processing-success-audit.log
+            fileExist: Append
+- route:
+    id: order-file-monitor-route
+    description: Monitor Orders Directory and Publish Files to ActiveMQ
+    from:
+      uri: timer
+      description: Scheduled 5 Mins
+      parameters:
+        timerName: orderScheduler
+        period: 300000
+      steps:
+        - pollEnrich:
+            description: Order IN
+            simple:
+              expression: file:src/main/resources/input/orders?include=.*\.json&noop=true
+            timeout: "1000"
+        - setHeaders:
+            description: Audit Metadata
+            headers:
+              - name: sourceEndpoint
+                simple:
+                  expression: ${header.CamelFileParent.replaceAll('\\','/')}
+              - name: exchangeId
+                simple:
+                  expression: ${exchangeId}
+              - name: routeId
+                simple:
+                  expression: ${routeId}
+              - name: startTime
+                simple:
+                  expression: ${date:now:yyyy-MM-dd HH:mm:ss}
+        - choice:
+            description: Validate Order File Availability
+            when:
+              - simple:
+                  expression: ${body} != null
+                steps:
+                  - to:
+                      description: Order_Q_OUT
+                      uri: activemq
+                      parameters:
+                        destinationName: order_Stored_OUT
+            otherwise:
+              steps:
+                - throwException:
+                    description: Raise Exception When No Order File Is Available
+                    exceptionType: java.lang.RuntimeException
+                    message: No File Found in Source Endpoint

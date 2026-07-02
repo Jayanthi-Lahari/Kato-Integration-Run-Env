@@ -1,0 +1,12 @@
+{
+  "orderId": "ORD1003",
+  "customerId": "CUST503",
+  "customerName": "Rahul Sharma",
+  "email": "rahul.sharma@example.com",
+  "product": "Monitor",
+  "quantity": 3,
+  "unitPrice": 18000,
+  "totalAmount": 54000,
+  "orderDate": "2026-06-30",
+  "paymentStatus": "PENDING"
+}
